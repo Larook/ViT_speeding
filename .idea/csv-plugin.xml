@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CsvFileAttributes">
+    <option name="attributeMap">
+      <map>
+        <entry key="$PROJECT_DIR$/../../../2nd_Semester/Project_in_Advanced_Robotics/Keypoint_Visuomotor_Behaviours/venv/lib/python3.8/site-packages/torch/nn/modules/activation.py">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../../2nd_Semester/Project_in_Advanced_Robotics/Keypoint_Visuomotor_Behaviours/venv/lib/python3.8/site-packages/torch/nn/modules/linear.py">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/model_training/main.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
