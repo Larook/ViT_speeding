@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<robot name="background_plane">
+  <link name="background">
+
+    <static>true</static>
+
+    <visual>
+      <geometry>
+        <box size="80 30 0.0001"/>
+      </geometry>
+
+      <material name="sky">
+        <color rgba="0.53 0.80 0.96 1"/>
+      </material>
+    </visual>
+
+
+  </link>
+</robot>

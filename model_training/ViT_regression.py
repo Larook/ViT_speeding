@@ -139,9 +139,6 @@ def evaluate(model, data_loader, loss_history):
           '{:4.2f}'.format(100.0 * correct_samples / total_samples) + '%)\n')
 
 
-
-
-
 if __name__ == "__main__":
 
     torch.manual_seed(42)
@@ -165,7 +162,7 @@ if __name__ == "__main__":
 
     start_time = time.time()
     model = ViT_regression(image_size=256, patch_size=8, num_outputs=1, channels=1,
-                               dim=64, depth=6, heads=8, mlp_dim=128)
+                               dim=64, depth=1, heads=2, mlp_dim=128)
     optimizer = optim.Adam(model.parameters(), lr=0.003)
 
     # training function
@@ -195,8 +192,9 @@ if __name__ == "__main__":
             output = model.forward(inputs)
             print('output', output)
 
-            loss = F.smooth_l1_loss(output, target)  # L1 loss for regression applications
+            loss = F.smooth_l1_loss(output, target.float())  # L1 loss for regression applications
             loss.backward()
+            print('loss', loss)
             optimizer.step()
 
     torch.save(model, 'KEYVIBE_model.pth')

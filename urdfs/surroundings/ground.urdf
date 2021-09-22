@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<robot name="plane_road">
+
+  <link name="road">
+
+    <visual>
+      <geometry>
+        <box size="6 20 0.001"/>
+      </geometry>
+
+      <material name="asphalt">
+        <color rgba="0.2 0.2 0.3 1"/>
+      </material>
+    </visual>
+
+  </link>
+
+  <link name="side">
+
+    <visual>
+      <geometry>
+        <box size="20 20 0.000001"/>
+      </geometry>
+
+      <material name="grass">
+        <color rgba="0.5 0.8 0.4 1"/>
+      </material>
+    </visual>
+  </link>
+
+
+  <joint name="joint1" type="continuous">
+    <parent link="road"/>
+    <child link="side"/>
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+</robot>
