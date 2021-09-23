@@ -52,6 +52,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/urdfs/obstacles/obstacle_10.urdf">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/urdfs/surroundings/background.urdf">
           <value>
             <Attribute>

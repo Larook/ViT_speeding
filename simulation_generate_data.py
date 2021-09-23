@@ -1,11 +1,13 @@
 import math
+import os
+import random
 import sys
 import time
 
 import numpy as np
 import pybullet as pb
-# import pybullet_data
 import pybullet_data
+from PIL import Image
 
 
 def load_buddy_urdf() -> int:
@@ -49,45 +51,9 @@ def load_car_urdf() -> int:
     return buddy_id
 
 
-
-class Environment():
-    # when clicking "G" when sim window pops out, the disturbing windows dissapear
-    env_pb_objects = []
-    def __init__(self, dt):
-        physicsClient = pb.connect(pb.GUI)
-        pb.setTimeStep(dt)
-        pb.setGravity(0, 0, -9.8)
-        pb.setAdditionalSearchPath(pybullet_data.getDataPath())
-        planeId = pb.loadURDF('plane.urdf')
-
-        plane_id = pb.loadURDF("urdfs/surroundings/ground.urdf", basePosition=[0, 3, 0], useFixedBase=1)
-        background_id = pb.loadURDF("urdfs/surroundings/background.urdf", basePosition=[0, 8, 0],
-                                    baseOrientation=pb.getQuaternionFromEuler((math.pi / 2, math.pi / 2, 0)),
-                                    useFixedBase=1)
-
-        # custom sliders to tune parameters (name of the parameter,range,initial value)
-        # xin = pb.addUserDebugParameter("x", -0.224, 0.224, 0)
-        # yin = pb.addUserDebugParameter("y", -0.224, 0.224, 0)
-        # zin = pb.addUserDebugParameter("z", 0, 1., 0.5)
-
-    def spawn_agent(self):
-        agent = Agent(urdf_path="urdfs/agent.urdf")
-        self.env_pb_objects.append(agent.id)
-        pass
-
-    def run(self):
-
-        # spawn obstacles randomly
-        def spawn_random_obstacle():
-            # spawns random obstacle from directory at the horizon
-            pass
-
-        enough_data_created = False
-        while 100:  # not enough_data_created:
-            pass
-
-        print("Simulation stopped")
-        return None
+def get_pos_pb_object(pb_id: int) -> list:
+    pos, _ = pb.getBasePositionAndOrientation(pb_id)
+    return pos
 
 
 class Agent:
@@ -130,6 +96,94 @@ class Agent:
         return img[..., :3]
 
 
+class Environment():
+    # when clicking "G" when sim window pops out, the disturbing windows dissapear
+    sim_dt: int
+    agent: Agent
+    env_pb_obstacle_ids = []
+
+    horizon_middle_point = [0, 8, 0]
+    obst_quat = pb.getQuaternionFromEuler([0, 0, math.pi/2])
+
+    dist_per_step = 0.0005
+
+    def __init__(self, dt):
+        physicsClient = pb.connect(pb.GUI)
+        self.sim_dt = dt
+        pb.setTimeStep(self.sim_dt)
+        pb.setGravity(0, 0, -9.8)
+        pb.setAdditionalSearchPath(pybullet_data.getDataPath())
+        planeId = pb.loadURDF('plane.urdf')
+
+        plane_id = pb.loadURDF("urdfs/surroundings/ground.urdf", basePosition=[0, 3, 0], useFixedBase=1)
+        background_id = pb.loadURDF("urdfs/surroundings/background.urdf", basePosition=[0, 8, 0],
+                                    baseOrientation=pb.getQuaternionFromEuler((math.pi/2, math.pi/2, 0)),
+                                    useFixedBase=1)
+
+        # custom sliders to tune parameters (name of the parameter,range,initial value)
+        # xin = pb.addUserDebugParameter("x", -0.224, 0.224, 0)
+        # yin = pb.addUserDebugParameter("y", -0.224, 0.224, 0)
+        # zin = pb.addUserDebugParameter("z", 0, 1., 0.5)
+
+    def get_random_hor_pose(self):
+        return np.add(self.horizon_middle_point, [np.random.uniform(-2.4, 2.4), 0.4, 0])
+
+    def spawn_agent(self):
+        self.agent = Agent(urdf_path="urdfs/agent.urdf")
+        self.agent_id = self.agent.id
+
+    def run(self):
+        """ whole procedure of creating a simulation
+        moves objects, resets their position and makes sure that agent saves images"""
+
+        def spawn_random_obstacle():
+            # spawns random obstacle from directory at the horizon
+            # todo: How to make sure that objects disappear and appear with the correct distance inbetween?
+            # todo: size of cars and size of road - how many lanes?
+            for urdf in os.listdir(os.getcwd() + '/urdfs/obstacles/'):
+                print("urdf=", urdf)
+                obs_id = pb.loadURDF(os.getcwd() + '/urdfs/obstacles/' + urdf, self.get_random_hor_pose(), self.obst_quat)
+                self.env_pb_obstacle_ids.append(obs_id)
+            pass
+
+        spawn_random_obstacle()
+        enough_data_created = False
+        while 10000:  # not enough_data_created:
+            idx_to_reset = self.move_obstacles_get_idx_to_reset()
+            self.reset_obstacles(idx_to_reset)
+
+            # todo: take and display image
+            image = self.agent.take_image()
+            # # from PIL import Image
+            # # import numpy as np
+            # img = Image.fromarray(image, 'RGB')
+            # img.show()
+            pass
+
+        print("Simulation stopped")
+        return None
+
+    def move_obstacles_get_idx_to_reset(self) -> list:
+        idx_to_remove = []
+
+        for i in self.env_pb_obstacle_ids:
+            pos, rot = pb.getBasePositionAndOrientation(i)
+            new_pos = np.add(pos, [0, -self.dist_per_step, 0])
+            pb.resetBasePositionAndOrientation(i, new_pos, rot)
+
+            # get indexes to reset
+            if new_pos[1] < -1:
+                idx_to_remove.append(i)
+        return idx_to_remove
+
+    def reset_obstacles(self, idx_to_reset):
+        for i in idx_to_reset:
+            pb.resetBasePositionAndOrientation(i, self.get_random_hor_pose(), self.obst_quat)
+        pass
+
+
+
+
 
 def test_show_obstacles():
     # buddy_id = load_buddy_urdf()
@@ -161,4 +215,4 @@ if __name__ == "__main__":
     environment.spawn_agent()
     environment.run()
 
-    test_show_obstacles()
+    # test_show_obstacles()
