@@ -13,7 +13,7 @@
         <box size="0.6 0.4 0.35"/>
       </geometry>
       <material name="color">
-        <color rgba="0 0.6 0.4 1"/>
+        <color rgba="0.4 0.1 0.2 1"/>
       </material>
     </visual>
     <collision>

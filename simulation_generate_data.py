@@ -8,6 +8,7 @@ import numpy as np
 import pybullet as pb
 import pybullet_data
 from PIL import Image
+from matplotlib import pyplot as plt
 
 
 def load_buddy_urdf() -> int:
@@ -62,7 +63,7 @@ class Agent:
     orientation: list
 
     def __init__(self, urdf_path: str):
-        self.pose = [0., 0., 0.3]
+        self.pose = [0., 0., 0.1]
         self.orientation = [0, 0, math.pi / 2]
         agent_id = pb.loadURDF(urdf_path, self.pose, pb.getQuaternionFromEuler(self.orientation))
         self.id = agent_id
@@ -79,7 +80,7 @@ class Agent:
                           contactDamping=-1)
 
 
-    def take_image(self):
+    def take_image(self, display=False):
         res = 400
         # target = self.pose + np.dot(self.orientation, [0, 0, 1.0, 1.0])[0:3]
         # print("target", target)
@@ -93,6 +94,13 @@ class Agent:
         projection_matrix = pb.computeProjectionMatrixFOV(30, 1, 0.001, 10)
 
         img, _, _ = pb.getCameraImage(res, res, view_matrix, projection_matrix, shadow=1)[2:]
+        if display:
+            # this looks good
+            plt.figure()
+            plt.imshow(img)
+            plt.title('captured img from agent')
+            plt.show()
+
         return img[..., :3]
 
 
@@ -106,6 +114,7 @@ class Environment():
     obst_quat = pb.getQuaternionFromEuler([0, 0, math.pi/2])
 
     dist_per_step = 0.0005
+    velocity = 10
 
     def __init__(self, dt):
         physicsClient = pb.connect(pb.GUI)
@@ -126,7 +135,7 @@ class Environment():
         # zin = pb.addUserDebugParameter("z", 0, 1., 0.5)
 
     def get_random_hor_pose(self):
-        return np.add(self.horizon_middle_point, [np.random.uniform(-2.4, 2.4), 0.4, 0])
+        return np.add(self.horizon_middle_point, [np.random.uniform(-2.4, 2.4), 0.4 + np.random.uniform(0.4, 12), 0.2])
 
     def spawn_agent(self):
         self.agent = Agent(urdf_path="urdfs/agent.urdf")
@@ -140,50 +149,56 @@ class Environment():
             # spawns random obstacle from directory at the horizon
             # todo: How to make sure that objects disappear and appear with the correct distance inbetween?
             # todo: size of cars and size of road - how many lanes?
-            for urdf in os.listdir(os.getcwd() + '/urdfs/obstacles/'):
+            for i, urdf in enumerate(os.listdir(os.getcwd() + '/urdfs/obstacles/')):
                 print("urdf=", urdf)
                 obs_id = pb.loadURDF(os.getcwd() + '/urdfs/obstacles/' + urdf, self.get_random_hor_pose(), self.obst_quat)
+                self.randomize_color(obs_id)
+
                 self.env_pb_obstacle_ids.append(obs_id)
             pass
 
         spawn_random_obstacle()
         enough_data_created = False
+
+        # pb.setRealTimeSimulation(1)
         while 10000:  # not enough_data_created:
-            idx_to_reset = self.move_obstacles_get_idx_to_reset()
+            idx_to_reset = self.move_and_get_obstacle_idx_to_reset()
             self.reset_obstacles(idx_to_reset)
 
-            # todo: take and display image
-            image = self.agent.take_image()
-            # # from PIL import Image
-            # # import numpy as np
-            # img = Image.fromarray(image, 'RGB')
-            # img.show()
+            img = self.agent.take_image(display=False)
+            pb.stepSimulation()
+
             pass
 
         print("Simulation stopped")
         return None
 
-    def move_obstacles_get_idx_to_reset(self) -> list:
+    def move_and_get_obstacle_idx_to_reset(self) -> list:
         idx_to_remove = []
 
         for i in self.env_pb_obstacle_ids:
+            pb.resetBaseVelocity(i, linearVelocity=[0, -self.velocity, 0], angularVelocity=[0, 0, 0])
             pos, rot = pb.getBasePositionAndOrientation(i)
-            new_pos = np.add(pos, [0, -self.dist_per_step, 0])
-            pb.resetBasePositionAndOrientation(i, new_pos, rot)
-
-            # get indexes to reset
-            if new_pos[1] < -1:
+            if pos[1] < -1:
                 idx_to_remove.append(i)
         return idx_to_remove
 
     def reset_obstacles(self, idx_to_reset):
         for i in idx_to_reset:
+            print("resets the position")
+            self.randomize_color(i)
             pb.resetBasePositionAndOrientation(i, self.get_random_hor_pose(), self.obst_quat)
         pass
 
+    def set_obstacles_velocity(self):
+        for i in self.env_pb_obstacle_ids:
+            pb.resetBaseVelocity(i, linearVelocity=[0, -self.velocity, 0], angularVelocity=[0, 0, 0])
 
-
-
+    def randomize_color(self, obs_id):
+        # doesnt work! Dont know why
+        for joint in range(10):
+            pb.changeVisualShape(obs_id, joint, rgbaColor=[np.random.uniform(0, 1), np.random.uniform(0, 1), np.random.uniform(0, 1), 1], physicsClientId=0)
+        return None
 
 def test_show_obstacles():
     # buddy_id = load_buddy_urdf()

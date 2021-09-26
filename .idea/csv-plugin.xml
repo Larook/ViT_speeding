@@ -3,6 +3,13 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="$PROJECT_DIR$/../../../2nd_Semester/Project_in_Advanced_Robotics/Keypoint_Visuomotor_Behaviours/venv/lib/python3.8/site-packages/matplotlib/pyplot.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/../../../2nd_Semester/Project_in_Advanced_Robotics/Keypoint_Visuomotor_Behaviours/venv/lib/python3.8/site-packages/torch/nn/modules/activation.py">
           <value>
             <Attribute>
@@ -53,6 +60,27 @@
           </value>
         </entry>
         <entry key="/urdfs/obstacles/obstacle_10.urdf">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/urdfs/obstacles/obstacle_3.urdf">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/urdfs/obstacles/obstacle_5.urdf">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/urdfs/obstacles/obstacle_9.urdf">
           <value>
             <Attribute>
               <option name="separator" value="," />
