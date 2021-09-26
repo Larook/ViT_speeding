@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/../../../2nd_Semester/Project_in_Advanced_Robotics/Keypoint_Visuomotor_Behaviours/venv/lib/python3.8/site-packages/pybullet_utils/urdfEditor.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/../../../2nd_Semester/Project_in_Advanced_Robotics/Keypoint_Visuomotor_Behaviours/venv/lib/python3.8/site-packages/torch/nn/modules/activation.py">
           <value>
             <Attribute>
