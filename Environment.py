@@ -1,4 +1,6 @@
 import os
+import random
+import time
 
 from Agent import Agent
 
@@ -28,7 +30,7 @@ class Environment():
         planeId = pb.loadURDF('plane.urdf')
 
         plane_id = pb.loadURDF("urdfs/surroundings/ground.urdf", basePosition=[0, 3, 0], useFixedBase=1)
-        background_id = pb.loadURDF("urdfs/surroundings/background.urdf", basePosition=[0, 8, 0],
+        background_id = pb.loadURDF("urdfs/surroundings/background.urdf", basePosition=[0, 20, 0],
                                     baseOrientation=pb.getQuaternionFromEuler((math.pi/2, math.pi/2, 0)),
                                     useFixedBase=1)
 
@@ -38,7 +40,10 @@ class Environment():
         # zin = pb.addUserDebugParameter("z", 0, 1., 0.5)
 
     def get_random_hor_pose(self):
-        return np.add(self.horizon_middle_point, [np.random.uniform(-2.4, 2.4), np.random.uniform(0.4, 12), 0])
+        # make sure that the positions are within ranges for each line
+        car_width = 0.7
+        lane_xs = [-1.5, -0.5, 0.5, 1.5]
+        return np.add(self.horizon_middle_point, [np.random.choice(lane_xs), np.random.uniform(0.4, 30), 0])
 
     def spawn_agent(self):
         self.agent = Agent(urdf_path="urdfs/agent.urdf")
@@ -50,8 +55,6 @@ class Environment():
 
         def spawn_random_obstacle():
             # spawns random obstacle from directory at the horizon
-            # todo: How to make sure that objects disappear and appear with the correct distance inbetween?
-            # todo: size of cars and size of road - how many lanes?
             for i, urdf in enumerate(os.listdir(os.getcwd() + '/urdfs/obstacles/')):
                 print("urdf=", urdf)
                 obs_id = pb.loadURDF(os.getcwd() + '/urdfs/obstacles/' + urdf, self.get_random_hor_pose(), self.obst_quat)
@@ -64,10 +67,17 @@ class Environment():
         enough_data_created = False
 
         # pb.setRealTimeSimulation(1)
-        while 1:  # not enough_data_created:
+        gather_data = True
+        while gather_data:  # not enough_data_created:
+            # if agent in collision then stop the game
+            if self.agent.collision_detected():
+                gather_data = False
+
+            # move all the obstacles and reset their positions when needed
             idx_to_reset = self.move_and_get_obstacle_idx_to_reset()
             self.reset_obstacles(idx_to_reset)
 
+            # take and save the image
             img = self.agent.take_image(display=False)
             pb.stepSimulation()
 

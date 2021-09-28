@@ -5,7 +5,7 @@
 
     <visual>
       <geometry>
-        <box size="6 20 0.001"/>
+        <box size="4 40 0.001"/>
       </geometry>
 
       <material name="asphalt">
@@ -19,7 +19,7 @@
 
     <visual>
       <geometry>
-        <box size="20 20 0.000001"/>
+        <box size="20 40 0.000001"/>
       </geometry>
 
       <material name="grass">

@@ -3,6 +3,13 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="/Agent.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/../../../2nd_Semester/Project_in_Advanced_Robotics/Keypoint_Visuomotor_Behaviours/venv/lib/python3.8/site-packages/matplotlib/pyplot.py">
           <value>
             <Attribute>
@@ -95,6 +102,13 @@
           </value>
         </entry>
         <entry key="/urdfs/surroundings/background.urdf">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/urdfs/surroundings/ground.urdf">
           <value>
             <Attribute>
               <option name="separator" value="," />

@@ -6,7 +6,6 @@ import pygame as pygame
 from matplotlib import pyplot as plt
 
 
-
 class Agent:
     id: int
     pose: list
@@ -47,11 +46,11 @@ class Agent:
         # up = np.dot(self.orientation, [0, -1.0, 0, 1.0])[0:3]
 
         eye, orient = pb.getBasePositionAndOrientation(self.id)
-        target = np.add(eye, [0, 100, 0])  # target = eye + np.matmul(orient, [0, 0, 10, 0])#[0:3]
-        up = [0, 0, 2]
+        target = np.add(eye, [0, 100, 2])  # target = eye + np.matmul(orient, [0, 0, 10, 0])#[0:3]
+        up = [0, 10, 10]
 
         view_matrix = pb.computeViewMatrix(eye, target, up)
-        projection_matrix = pb.computeProjectionMatrixFOV(30, 1, 0.001, 10)
+        projection_matrix = pb.computeProjectionMatrixFOV(40, 1, 0.01, 100)
 
         img, _, _ = pb.getCameraImage(res, res, view_matrix, projection_matrix, shadow=1)[2:]
         if display:
@@ -89,6 +88,12 @@ class Agent:
                                            np.add(pose, [math.sin(self.steering_angle) * self.velocity * dt, 0, 0]),
                                            pb.getQuaternionFromEuler(self.orientation))
         return v_y
+
+    def collision_detected(self):
+        contact_points = pb.getContactPoints(bodyA=self.id)  # , physicsClientId=1)
+        if len(contact_points) > 4:
+            return True
+        return False
 
 def get_key_pressed(relevant=None):
     pressed_keys = []

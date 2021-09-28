@@ -14,6 +14,17 @@ from Environment import Environment
 
 DETLA_T = 0.1
 
+#TODO:
+"""
+OK - end simulation when collision detected
+- setup the environment with 4 lanes of cars
+    OK- 4 different x positions for cars to spawn
+    OK- width of the cars / lanes
+    OK- field of view of the camera
+- what about the velocity? When playing try to increase it sometimes
+    - Add saving the pictures (if collided dont save last 2 seconds of decisions)
+"""
+
 if __name__ == "__main__":
     # define environment
     environment = Environment(dt=DETLA_T)
