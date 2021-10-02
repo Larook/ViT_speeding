@@ -10,6 +10,27 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/Environment.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/TrainingData.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/countries.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/../../../2nd_Semester/Project_in_Advanced_Robotics/Keypoint_Visuomotor_Behaviours/venv/lib/python3.8/site-packages/matplotlib/pyplot.py">
           <value>
             <Attribute>
@@ -52,6 +73,48 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/model_training/data/29-09_11:08_training_data.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/model_training/data/29-09_23:13_training_data.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/model_training/data/29-09_23:14_training_data.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/model_training/data/30-09_17:00_training_data.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/model_training/data/30-09_17:37_training_data.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/model_training/data/30-09_17:40_training_data.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/model_training/main.py">
           <value>
             <Attribute>
@@ -60,6 +123,20 @@
           </value>
         </entry>
         <entry key="/simulation_generate_data.py">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/test_TrainingData.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/tests/test_TrainingData.py">
           <value>
             <Attribute>
               <option name="separator" value=":" />

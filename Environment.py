@@ -9,6 +9,8 @@ import numpy as np
 import pybullet as pb
 import pybullet_data
 
+from TrainingData import TrainingData
+
 
 class Environment():
     # when clicking "G" when sim window pops out, the disturbing windows dissapear
@@ -38,6 +40,7 @@ class Environment():
         # xin = pb.addUserDebugParameter("x", -0.224, 0.224, 0)
         # yin = pb.addUserDebugParameter("y", -0.224, 0.224, 0)
         # zin = pb.addUserDebugParameter("z", 0, 1., 0.5)
+        self.training_data = TrainingData()
 
     def get_random_hor_pose(self):
         # make sure that the positions are within ranges for each line
@@ -73,25 +76,28 @@ class Environment():
             if self.agent.collision_detected():
                 gather_data = False
 
-            # move all the obstacles and reset their positions when needed
-            idx_to_reset = self.move_and_get_obstacle_idx_to_reset()
-            self.reset_obstacles(idx_to_reset)
-
             # take and save the image
             img = self.agent.take_image(display=False)
+
+            # save the action to take for current img
+            v_y = self.agent.get_updated_dynamics(self.sim_dt, keyboard=True)
+            print("steering_angle=%f  v_Y=%f" % (self.agent.steering_angle, v_y))
+
+            # save img-angle-vel_y
+            self.training_data.save_training_information(img, self.agent.steering_angle, v_y)
+
+            # move all the obstacles and reset their positions when needed
+            idx_to_reset = self.move_and_get_obstacle_idx_to_reset(v_y)
+            self.reset_obstacles(idx_to_reset)
+
             pb.stepSimulation()
 
 
         print("Simulation stopped")
         return None
 
-    def move_and_get_obstacle_idx_to_reset(self) -> list:
+    def move_and_get_obstacle_idx_to_reset(self, v_y :float) -> list:
         idx_to_remove = []
-
-        # p_x, v_y = self.agent.get_updated_dynamics(self.sim_dt)
-        v_y = self.agent.get_updated_dynamics(self.sim_dt, keyboard=True)
-        print("steering_angle=%f  v_Y=%f" % (self.agent.steering_angle, v_y))
-        # print("v_y", v_y)
 
         for i in self.env_pb_obstacle_ids:
             pb.resetBaseVelocity(i, linearVelocity=[0, -v_y, 0], angularVelocity=[0, 0, 0])
