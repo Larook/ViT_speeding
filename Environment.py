@@ -9,7 +9,7 @@ import numpy as np
 import pybullet as pb
 import pybullet_data
 
-from TrainingData import TrainingData
+from TrainingData import SimulationData
 
 
 class Environment():
@@ -40,7 +40,7 @@ class Environment():
         # xin = pb.addUserDebugParameter("x", -0.224, 0.224, 0)
         # yin = pb.addUserDebugParameter("y", -0.224, 0.224, 0)
         # zin = pb.addUserDebugParameter("z", 0, 1., 0.5)
-        self.training_data = TrainingData()
+        self.training_data = SimulationData()
 
     def get_random_hor_pose(self):
         # make sure that the positions are within ranges for each line

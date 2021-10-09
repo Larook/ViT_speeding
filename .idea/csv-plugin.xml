@@ -17,7 +17,21 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/SimulationImageDataset.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/TrainingData.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/ViTModelGenerator.py">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -136,10 +150,24 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/tests/test_SimulationImageDataset.py">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/tests/test_TrainingData.py">
           <value>
             <Attribute>
               <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/tests/test_ViTModelGenerator.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
