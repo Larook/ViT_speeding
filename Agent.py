@@ -41,6 +41,7 @@ class Agent:
 
     def take_image(self, display=False):
         res = 400
+        # res = 256
         # target = self.pose + np.dot(self.orientation, [0, 0, 1.0, 1.0])[0:3]
         # print("target", target)
         # up = np.dot(self.orientation, [0, -1.0, 0, 1.0])[0:3]
@@ -62,7 +63,7 @@ class Agent:
 
         return img[..., :3]
 
-    def get_updated_dynamics(self, dt, keyboard=False):
+    def get_new_v(self, dt, keyboard=False):
 
         if not keyboard:
             self.steering_angle = pb.readUserDebugParameter(self.steering_angle_slider)
@@ -81,19 +82,21 @@ class Agent:
                     self.velocity = self.velocity - self.step_velocity
 
         v_y = self.angle_to_vy()
-
-        pose, _ = pb.getBasePositionAndOrientation(self.id)
-
-        pb.resetBasePositionAndOrientation(self.id,
-                                           np.add(pose, [math.sin(self.steering_angle) * self.velocity * dt, 0, 0]),
-                                           pb.getQuaternionFromEuler(self.orientation))
         return v_y
+
 
     def collision_detected(self):
         contact_points = pb.getContactPoints(bodyA=self.id)  # , physicsClientId=1)
         if len(contact_points) > 4:
             return True
         return False
+
+    def update_pose(self, dt):
+        pose, _ = pb.getBasePositionAndOrientation(self.id)
+        pb.resetBasePositionAndOrientation(self.id, np.add(pose, [math.sin(self.steering_angle) * self.velocity * dt, 0, 0]),
+                                           pb.getQuaternionFromEuler(self.orientation))
+        pass
+
 
 def get_key_pressed(relevant=None):
     pressed_keys = []

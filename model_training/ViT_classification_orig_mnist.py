@@ -61,7 +61,7 @@ def train_epoch(model, optimizer, data_loader, loss_history):
         # output_reg = model(data)
         # output_lin = F.linear(output_reg, dim=1)
 
-        output = F.log_softmax(model(data), dim=1)
+        output = F.log_softmax(model.forward(data), dim=1)
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
@@ -82,7 +82,7 @@ def evaluate(model, data_loader, loss_history):
 
     with torch.no_grad():
         for data, target in data_loader:
-            output = F.log_softmax(model(data), dim=1)
+            output = F.log_softmax(model.forward(data), dim=1)
             loss = F.nll_loss(output, target, reduction='sum')
             _, pred = torch.max(output, dim=1)
 

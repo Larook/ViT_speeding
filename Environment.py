@@ -2,6 +2,11 @@ import os
 import random
 import time
 
+import torch
+from PIL import Image
+from einops import rearrange
+from torchvision.transforms import transforms
+
 from Agent import Agent
 
 import math
@@ -9,7 +14,7 @@ import numpy as np
 import pybullet as pb
 import pybullet_data
 
-from TrainingData import SimulationData
+from SimulationData import SimulationData
 
 
 class Environment():
@@ -52,7 +57,7 @@ class Environment():
         self.agent = Agent(urdf_path="urdfs/agent.urdf")
         self.agent_id = self.agent.id
 
-    def run(self):
+    def run(self, keyboard_steering, ai_steering, **kwargs):
         """ whole procedure of creating a simulation
         moves objects, resets their position and makes sure that agent saves images"""
 
@@ -67,31 +72,13 @@ class Environment():
             pass
 
         spawn_random_obstacle()
-        enough_data_created = False
 
-        # pb.setRealTimeSimulation(1)
-        gather_data = True
-        while gather_data:  # not enough_data_created:
-            # if agent in collision then stop the game
-            if self.agent.collision_detected():
-                gather_data = False
+        # print("kwargs['ai_model']", kwargs['ai_model'])
 
-            # take and save the image
-            img = self.agent.take_image(display=False)
-
-            # save the action to take for current img
-            v_y = self.agent.get_updated_dynamics(self.sim_dt, keyboard=True)
-            print("steering_angle=%f  v_Y=%f" % (self.agent.steering_angle, v_y))
-
-            # save img-angle-vel_y
-            self.training_data.save_training_information(img, self.agent.steering_angle, v_y)
-
-            # move all the obstacles and reset their positions when needed
-            idx_to_reset = self.move_and_get_obstacle_idx_to_reset(v_y)
-            self.reset_obstacles(idx_to_reset)
-
-            pb.stepSimulation()
-
+        if keyboard_steering:
+            self.gather_data()
+        if ai_steering:
+            self.evaluate_ai(kwargs['ai_model'])
 
         print("Simulation stopped")
         return None
@@ -122,4 +109,69 @@ class Environment():
         for joint in range(10):
             pb.changeVisualShape(obs_id, joint, rgbaColor=[np.random.uniform(0, 1), np.random.uniform(0, 1), np.random.uniform(0, 1), 1], physicsClientId=0)
         return None
+
+    def gather_data(self):
+        """ run the simulaton and save data """
+        enough_data_created = False
+
+        gather_data = True
+        while gather_data:  # not enough_data_created:
+            # if agent in collision then stop the game
+            if self.agent.collision_detected():
+                gather_data = False
+
+            # take and save the image
+            img = self.agent.take_image(display=False)
+
+            # save the action to take for current img
+            v_y = self.agent.get_new_v(self.sim_dt, keyboard=True)
+
+            # move the agent
+            self.agent.update_pose(dt=self.sim_dt)
+            print("steering_angle=%f  v_Y=%f" % (self.agent.steering_angle, v_y))
+
+            # save img-angle-vel_y
+            self.training_data.save_training_information(img, self.agent.steering_angle, v_y)
+
+            # move all the obstacles and reset their positions when needed
+            idx_to_reset = self.move_and_get_obstacle_idx_to_reset(v_y)
+            self.reset_obstacles(idx_to_reset)
+
+            pb.stepSimulation()
+        pass
+
+    def evaluate_ai(self, ai_model):
+        print("*********************** evaluate_ai ***********************")
+        # print("ai_model", ai_model)
+        # exit(0)
+
+        preprocess = transforms.Compose([transforms.Resize((256, 256)),
+                                               transforms.Grayscale(num_output_channels=1),
+                                               # transforms.RandomVerticalFlip(),
+                                               transforms.RandomHorizontalFlip(),
+                                               transforms.ToTensor()
+                                               ])
+
+        while not self.agent.collision_detected():
+            # if agent in collision then stop the game
+            img = self.agent.take_image(display=False)
+
+            # need to change dimensions of img (assume batch = 1)
+            input_tensor = preprocess(Image.fromarray(img))
+            input_batch = input_tensor.unsqueeze(0)
+
+            angle = ai_model.forward(input_batch)
+            self.agent.steering_angle = angle
+
+            # move the agent
+            self.agent.update_pose(dt=self.sim_dt)
+
+            v_y = self.agent.angle_to_vy()
+            print("steering_angle=%f  v_Y=%f" % (self.agent.steering_angle, v_y))
+            # move all the obstacles and reset their positions when needed
+            idx_to_reset = self.move_and_get_obstacle_idx_to_reset(v_y)
+            self.reset_obstacles(idx_to_reset)
+
+            pb.stepSimulation()
+        pass
 

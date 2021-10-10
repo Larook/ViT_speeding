@@ -34,6 +34,6 @@ if __name__ == "__main__":
 
     environment.spawn_agent()
 
-    environment.run()
+    environment.run(keyboard_steering=True, ai_steering=False)
 
     # test_show_obstacles()

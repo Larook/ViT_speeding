@@ -7,13 +7,17 @@ import numpy as np
 import torch
 import torchvision
 import torch.nn.functional as F
+from matplotlib import pyplot as plt
+from torch.utils.data import DataLoader
 from torchvision import datasets, transforms, models
 
 from einops import rearrange
 from torch import nn, optim
 import einops
+from tqdm import tqdm
 
 from SimulationData import SimulationData
+from SimulationImageDataset import SimulationImageDataset
 from model_training import vit_pytorch
 
 
@@ -44,91 +48,136 @@ class ViTRegression(nn.Module):
             nn.GELU(),
             nn.Linear(mlp_dim, num_outputs)
         )
+        self.optimizer = optim.Adam(self.parameters(), lr=0.003)
+
+    def load_dataloaders(self, dir_path):
+        """ reads the pickles from the directory and updates dfs, SimulationData and dataloaders """
+        # load training data
+        self.data = SimulationData(create=False)
+        self.train_df, self.test_df = self.data.load_dfs_from_pickles(create=False, training_percentage=0.8,
+                                                                      dir_path=dir_path, shuffle=True)
+
+        train_transforms = transforms.Compose([transforms.Resize((256, 256)),
+                                               transforms.Grayscale(num_output_channels=1),
+                                               # transforms.RandomVerticalFlip(),
+                                               transforms.RandomHorizontalFlip(),
+                                               transforms.ToTensor()
+                                               ])
+
+        dataset_train = SimulationImageDataset(main_df=self.train_df, transform=train_transforms)
+        dataset_test = SimulationImageDataset(main_df=self.test_df, transform=train_transforms)
+
+        # create dataloaders
+        self.train_dataloader = DataLoader(dataset_train, batch_size=10, shuffle=True)
+        self.test_dataloader = DataLoader(dataset_test, batch_size=10, shuffle=True)
+        pass
+
+    # def load_split_train_test(self, train_data, test_data, valid_size=.2):
+    #     train_transforms = transforms.Compose([transforms.Resize((256, 256)),
+    #                                            transforms.Grayscale(num_output_channels=1),
+    #                                            transforms.RandomVerticalFlip(),
+    #                                            transforms.RandomHorizontalFlip(),
+    #                                            transforms.ToTensor(),
+    #                                            ])
+    #
+    #     test_transforms = transforms.Compose([transforms.Resize((256, 256)),
+    #                                           transforms.Grayscale(num_output_channels=1),
+    #                                           transforms.RandomVerticalFlip(),
+    #                                           transforms.RandomHorizontalFlip(),
+    #                                           transforms.ToTensor(),
+    #                                           ])
+    #
+    #     # train_data = datasets.ImageFolder(data_dir, transform=train_transforms)
+    #     # test_data = datasets.ImageFolder(data_dir, transform=test_transforms)
+    #
+    #
+    #     num_train = len(train_data)
+    #     indices = list(range(num_train))
+    #     split = int(np.floor(valid_size * num_train))
+    #     np.random.shuffle(indices)
+    #
+    #     from torch.utils.data.sampler import SubsetRandomSampler
+    #
+    #     train_idx, test_idx = indices[split:], indices[:split]
+    #     train_sampler = SubsetRandomSampler(train_idx)
+    #     test_sampler = SubsetRandomSampler(test_idx)
+    #
+    #     self.trainloader = torch.utils.data.DataLoader(train_data, sampler=train_sampler, batch_size=64)
+    #     self.testloader = torch.utils.data.DataLoader(test_data, sampler=test_sampler, batch_size=64)
+
 
     def forward(self, img, mask=None):
         p = self.patch_size
 
-        x = rearrange(img, 'b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1=p, p2=p)
+        x = rearrange(img, 'b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1=p, p2=p)  # height weight channel batch
         x = self.patch_to_embedding(x)
 
         cls_tokens = self.cls_token.expand(img.shape[0], -1, -1)
-        print('cls_tokens', cls_tokens)
+        # print('cls_tokens', cls_tokens)
 
         x = torch.cat((cls_tokens, x), dim=1)
         x += self.pos_embedding
         x = self.transformer(x, mask)
 
         x = self.to_cls_token(x[:, 0])
-        print('x', x)
+        # print('x', x)
         return self.mlp_head(x)
 
-    def load_simulation_data(self, main_df, shuffle=True):
-        # row = dict(time=time.time()-self.start_time, steering_angle=angle, velocity_y=v_y, image=img)
-        main_df = main_df.sample(frac=1)
+    # def load_simulation_data(self, main_df, shuffle=True):
+    #     # row = dict(time=time.time()-self.start_time, steering_angle=angle, velocity_y=v_y, image=img)
+    #     main_df = main_df.sample(frac=1)
+    #
+    #     # inputs are just images or maybe images + time
+    #     # outputs should be steering angle + velocity
+    #
+    #     self.inputs = torch.tensor(main_df['image'].values)
+    #     self.outputs = torch.tensor(main_df['steering_angle'].values)
+    #     pass
 
-        # inputs are just images or maybe images + time
-        # outputs should be steering angle + velocity
+    def train_epochs(self, max_epochs, save_path):
+        self.loss_train_history = []
+        self.loss_test_history = []
 
-        self.inputs = torch.tensor(main_df['image'].values)
-        self.outputs = torch.tensor(main_df['steering_angle'].values)
+        # total_samples = len(self.train_dataloader.dataset)
+
+        # Loop over epochs
+        for epoch in tqdm(range(max_epochs)):
+            for i, [imgs, angles, vels] in enumerate(self.train_dataloader):
+                self.train()
+                self.optimizer.zero_grad()
+                output = self.forward(imgs)
+                target = angles.unsqueeze(1).float()
+                loss = F.smooth_l1_loss(output, target)  # L1 loss for regression applications
+                loss.backward()
+                self.optimizer.step()
+                self.loss_train_history.append(loss.item())
+
+                # if i % 100 == 0:
+                #     print('[' +  '{:5}'.format(i * len(imgs)) + '/' + '{:5}'.format(total_samples) +
+                #           ' (' + '{:3.0f}'.format(100 * i / len(self.train_dataloader)) + '%)]  Loss: ' +
+                #           '{:6.4f}'.format(loss.item()))
+
+            for j, [imgs, angles, vels] in enumerate(self.test_dataloader):
+                self.eval()
+                self.optimizer.zero_grad()
+                output = self.forward(imgs)
+                target = angles.unsqueeze(1).float()
+                loss = F.smooth_l1_loss(output, target)  # L1 loss for regression applications
+                # loss.backward()
+                # self.optimizer.step()
+                self.loss_test_history.append(loss.item())
+
+        torch.save(self.state_dict(), save_path)
         pass
 
-
-    def load_split_train_test(self, data_dir, valid_size=.2):
-        train_transforms = transforms.Compose([transforms.Resize((256, 256)),
-                                               transforms.Grayscale(num_output_channels=1),
-                                               transforms.RandomVerticalFlip(),
-                                               transforms.RandomHorizontalFlip(),
-                                               transforms.ToTensor(),
-                                               ])
-
-        test_transforms = transforms.Compose([transforms.Resize((256, 256)),
-                                              transforms.Grayscale(num_output_channels=1),
-                                              transforms.RandomVerticalFlip(),
-                                              transforms.RandomHorizontalFlip(),
-                                              transforms.ToTensor(),
-                                              ])
-
-        train_data = datasets.ImageFolder(data_dir, transform=train_transforms)
-        test_data = datasets.ImageFolder(data_dir, transform=test_transforms)
-
-
-
-        num_train = len(train_data)
-        indices = list(range(num_train))
-        split = int(np.floor(valid_size * num_train))
-        np.random.shuffle(indices)
-
-        from torch.utils.data.sampler import SubsetRandomSampler
-
-        train_idx, test_idx = indices[split:], indices[:split]
-        train_sampler = SubsetRandomSampler(train_idx)
-        test_sampler = SubsetRandomSampler(test_idx)
-
-        self.trainloader = torch.utils.data.DataLoader(train_data, sampler=train_sampler, batch_size=64)
-        self.testloader = torch.utils.data.DataLoader(test_data, sampler=test_sampler, batch_size=64)
-
-
-
-    def train_epoch(model, optimizer, data_loader, loss_history):
-        total_samples = len(data_loader.dataset)
-        model.train()
-
-        for i, (data, target) in enumerate(data_loader):
-            optimizer.zero_grad()
-
-            output = model(data)
-            # loss = F.nll_loss(output, target)
-            loss = F.smooth_l1_loss(output, target)  # L1 loss for regression applications
-            loss.backward()
-            optimizer.step()
-
-            if i % 100 == 0:
-                print('[' +  '{:5}'.format(i * len(data)) + '/' + '{:5}'.format(total_samples) +
-                      ' (' + '{:3.0f}'.format(100 * i / len(data_loader)) + '%)]  Loss: ' +
-                      '{:6.4f}'.format(loss.item()))
-                loss_history.append(loss.item())
-
+    def plot_training_history(self):
+        plt.xlabel("epochs")
+        plt.ylabel("loss")
+        plt.title("Check losses for overfitting")
+        plt.plot(self.loss_train_history, label='loss_train_history')
+        plt.plot(self.loss_test_history, label='loss_test_history')
+        plt.legend()
+        plt.show()
 
     def evaluate(model, data_loader, loss_history):
         model.eval()

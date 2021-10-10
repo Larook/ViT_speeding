@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+from PIL import Image
+
 from torchvision.io import read_image
 import torch
 from torch.utils.data import Dataset
@@ -24,7 +26,8 @@ class SimulationImageDataset(Dataset):
         steering_angle = self.df['steering_angle'][idx]
         velocity_y = self.df['velocity_y'][idx]
         if self.transform:
-            image = self.transform(image)
+            img = Image.fromarray(image, 'RGB')
+            image = self.transform(img)
         if self.target_transform:
             steering_angle = self.target_transform(steering_angle)
             velocity_y = self.target_transform(velocity_y)

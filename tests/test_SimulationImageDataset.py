@@ -43,7 +43,6 @@ class TestSimulationImageDataset(TestCase):
         self.assertEqual(len(imgs_training) + len(imgs_test), len(main_df))
         pass
 
-
     def test_dataloaders(self):
         from torch.utils.data import DataLoader
 
