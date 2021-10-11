@@ -114,11 +114,10 @@ class Environment():
         """ run the simulaton and save data """
         enough_data_created = False
 
-        gather_data = True
-        while gather_data:  # not enough_data_created:
+        can_proceed = True
+        while can_proceed:  # not enough_data_created:
             # if agent in collision then stop the game
-            if self.agent.collision_detected():
-                gather_data = False
+            can_proceed = not self.agent.collision_detected() and self.agent.is_on_the_lane()
 
             # take and save the image
             img = self.agent.take_image(display=False)
@@ -142,17 +141,17 @@ class Environment():
 
     def evaluate_ai(self, ai_model):
         print("*********************** evaluate_ai ***********************")
-        # print("ai_model", ai_model)
-        # exit(0)
-
         preprocess = transforms.Compose([transforms.Resize((256, 256)),
                                                transforms.Grayscale(num_output_channels=1),
                                                # transforms.RandomVerticalFlip(),
-                                               transforms.RandomHorizontalFlip(),
+                                               # transforms.RandomHorizontalFlip(),
                                                transforms.ToTensor()
                                                ])
+        can_proceed = True
+        # print("self.agent.is_on_the_lane()", self.agent.is_on_the_lane())
+        while can_proceed:
+            can_proceed = not self.agent.collision_detected() and self.agent.is_on_the_lane()
 
-        while not self.agent.collision_detected():
             # if agent in collision then stop the game
             img = self.agent.take_image(display=False)
 

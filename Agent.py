@@ -86,16 +86,27 @@ class Agent:
 
 
     def collision_detected(self):
+        """ returns True when agent is in collision """
         contact_points = pb.getContactPoints(bodyA=self.id)  # , physicsClientId=1)
         if len(contact_points) > 4:
             return True
         return False
 
     def update_pose(self, dt):
+        """ moves the agent - updates position and observation after the velocities obtained """
         pose, _ = pb.getBasePositionAndOrientation(self.id)
         pb.resetBasePositionAndOrientation(self.id, np.add(pose, [math.sin(self.steering_angle) * self.velocity * dt, 0, 0]),
                                            pb.getQuaternionFromEuler(self.orientation))
         pass
+
+    def is_on_the_lane(self):
+        """ returns False when the agent gets on to the grass """
+        pose, _ = pb.getBasePositionAndOrientation(self.id)
+        # print("pose", pose)
+        pose_x = pose[0]
+        if pose_x > 1.8 or pose_x < -1.8:
+            return False
+        return True
 
 
 def get_key_pressed(relevant=None):

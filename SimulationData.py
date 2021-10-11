@@ -11,7 +11,7 @@ class SimulationData():
     """ save everything to pandas df to easily save to csv
         make sure that not everything is saved in RAM
         if collision detected discard last X seconds of data to save """
-    rows_max = 100
+    rows_max = 20
 
     def __init__(self, create=True):
         self.start_time = time.time()
@@ -28,14 +28,13 @@ class SimulationData():
             if 'tests' not in os.getcwd():
                 if not os.path.exists(self.dir_path):
                     os.mkdir(self.dir_path)
-
-            self.filepath = self.dir_path + dt_string
+            self.filepath = self.dir_path + '/' + dt_string
 
     def save_training_information(self, img, angle, v_y):
         row = dict(time=time.time()-self.start_time, steering_angle=angle, velocity_y=v_y, image=img)
         self.memory.append(row)
         self.rows_in_memory += 1
-
+        print("<> save_training_information ->", self.filepath + "_p" + str(self.pickle_part) + ".pkl")
         if self.rows_in_memory >= self.rows_max:
             # flush the memory to save the existing csv
             df = pd.DataFrame(self.memory)
