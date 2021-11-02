@@ -6,6 +6,7 @@ import torch
 from PIL import Image
 from einops import rearrange
 from torchvision.transforms import transforms
+import PySimpleGUI as sg
 
 from Agent import Agent
 
@@ -30,6 +31,10 @@ class Environment():
 
     def __init__(self, dt):
         physicsClient = pb.connect(pb.GUI)
+        # physicsClient = pb.connect(pb.UDP, "192.168.0.10")
+        # physicsClient = pb.connect(pb.TCP, "localhost", 6667)
+        while not pb.isConnected():
+            pass
         self.sim_dt = dt
         pb.setTimeStep(self.sim_dt)
         pb.setGravity(0, 0, -9.8)
@@ -51,7 +56,7 @@ class Environment():
         # make sure that the positions are within ranges for each line
         car_width = 0.7
         lane_xs = [-1.5, -0.5, 0.5, 1.5]
-        return np.add(self.horizon_middle_point, [np.random.choice(lane_xs), np.random.uniform(0.4, 30), 0])
+        return np.add(self.horizon_middle_point, [np.random.choice(lane_xs), np.random.uniform(0.4, 60), 0])
 
     def spawn_agent(self):
         self.agent = Agent(urdf_path="urdfs/agent.urdf")
@@ -61,7 +66,7 @@ class Environment():
         """ whole procedure of creating a simulation
         moves objects, resets their position and makes sure that agent saves images"""
 
-        def spawn_random_obstacle():
+        def spawn_random_obstacles():
             # spawns random obstacle from directory at the horizon
             for i, urdf in enumerate(os.listdir(os.getcwd() + '/urdfs/obstacles/')):
                 print("urdf=", urdf)
@@ -71,7 +76,7 @@ class Environment():
                 self.env_pb_obstacle_ids.append(obs_id)
             pass
 
-        spawn_random_obstacle()
+        spawn_random_obstacles()
 
         # print("kwargs['ai_model']", kwargs['ai_model'])
 
@@ -137,7 +142,16 @@ class Environment():
             self.reset_obstacles(idx_to_reset)
 
             pb.stepSimulation()
-        pass
+
+        save_the_trajectories = self.popup_window_ask_if_save()
+        if not save_the_trajectories:
+            # delete the folder
+            print("self.dir_path", self.training_data.dir_path)
+            files_in_dir = os.listdir(self.training_data.dir_path)
+            print("files_in_dir", files_in_dir)
+            os.rmdir(self.training_data.dir_path)
+            print("REMOVED ALL FILES FROM THIS ATTEMPT")
+
 
     def evaluate_ai(self, ai_model):
         print("*********************** evaluate_ai ***********************")
@@ -173,4 +187,13 @@ class Environment():
 
             pb.stepSimulation()
         pass
+
+    def popup_window_ask_if_save(self):
+        answer = sg.popup_yes_no('Do you want to save this approach?')
+        if answer == 'No':
+            sg.popup_cancel('Deleting the trajectories')
+            return False
+        elif answer == "Yes":
+            sg.popup_cancel("Ok saving the trajectories")
+            return True
 

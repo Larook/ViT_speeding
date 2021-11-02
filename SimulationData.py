@@ -78,7 +78,7 @@ class SimulationData():
         max_training_idx = int(training_percentage * len(df))
 
         train_df = df[:max_training_idx]
-        test_df = df[max_training_idx:].reset_index(drop=True)
+        test_df = df[max_training_idx:]
 
         if shuffle:
             train_df = train_df.reset_index(drop=True)

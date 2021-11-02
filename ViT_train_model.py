@@ -18,7 +18,8 @@ DETLA_T = 0.1
 
 #TODO:
 """
-[ ] - 
+- improve plots
+    - for each plot add text message with the final training and testing loss
 """
 
 if __name__ == "__main__":
@@ -29,5 +30,7 @@ if __name__ == "__main__":
 
     model = ViTRegression(**params)
     model.load_dataloaders(dir_path=training_data_dir_path)
-    model.train_epochs(max_epochs=100, save_path='10_10_model.pth')
+
+    train_params = dict(max_epochs=700)
+    model.train_epochs(dict_params=train_params)
     model.plot_training_history()

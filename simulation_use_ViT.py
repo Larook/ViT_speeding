@@ -32,9 +32,8 @@ if __name__ == "__main__":
     model_params = dict(image_size=256, patch_size=8, num_outputs=1, channels=1,
                        dim=64, depth=1, heads=2, mlp_dim=128)
     model = ViTRegression(**model_params)
-    model.load_state_dict(torch.load('10_10_model.pth'))
+    model.load_state_dict(torch.load('model_training/trained_models/model_700.pth'))
     model.eval()
-
 
     # define environment
     environment = Environment(dt=DETLA_T)

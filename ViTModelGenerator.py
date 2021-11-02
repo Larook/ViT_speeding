@@ -134,14 +134,19 @@ class ViTRegression(nn.Module):
     #     self.outputs = torch.tensor(main_df['steering_angle'].values)
     #     pass
 
-    def train_epochs(self, max_epochs, save_path):
+    def train_epochs(self, dict_params):
+        self.max_epochs = dict_params['max_epochs']
+
         self.loss_train_history = []
         self.loss_test_history = []
 
         # total_samples = len(self.train_dataloader.dataset)
 
         # Loop over epochs
-        for epoch in tqdm(range(max_epochs)):
+        for epoch in tqdm(range(self.max_epochs)):
+            running_loss_train = []
+            running_loss_test = []
+
             for i, [imgs, angles, vels] in enumerate(self.train_dataloader):
                 self.train()
                 self.optimizer.zero_grad()
@@ -150,12 +155,8 @@ class ViTRegression(nn.Module):
                 loss = F.smooth_l1_loss(output, target)  # L1 loss for regression applications
                 loss.backward()
                 self.optimizer.step()
-                self.loss_train_history.append(loss.item())
-
-                # if i % 100 == 0:
-                #     print('[' +  '{:5}'.format(i * len(imgs)) + '/' + '{:5}'.format(total_samples) +
-                #           ' (' + '{:3.0f}'.format(100 * i / len(self.train_dataloader)) + '%)]  Loss: ' +
-                #           '{:6.4f}'.format(loss.item()))
+                running_loss_train.append(loss.item())
+            self.loss_train_history.append(np.mean(running_loss_train))
 
             for j, [imgs, angles, vels] in enumerate(self.test_dataloader):
                 self.eval()
@@ -165,19 +166,43 @@ class ViTRegression(nn.Module):
                 loss = F.smooth_l1_loss(output, target)  # L1 loss for regression applications
                 # loss.backward()
                 # self.optimizer.step()
-                self.loss_test_history.append(loss.item())
+                running_loss_test.append(loss.item())
+            self.loss_test_history.append(np.mean(running_loss_test))
 
-        torch.save(self.state_dict(), save_path)
+        self.save_training_model_statistics()
+
+        model_save_path = 'model_training/trained_models/model_' + str(self.max_epochs) + '.pth'
+        torch.save(self.state_dict(), model_save_path)
         pass
 
+    def save_training_model_statistics(self):
+
+        float_formatter = "{:.4f}".format
+
+        final_loss_train = float_formatter(self.loss_train_history[-1])
+        min_loss_train = float_formatter(np.min(self.loss_train_history))
+
+        final_loss_test = float_formatter(self.loss_test_history[-1])
+        min_loss_test = float_formatter(np.min(self.loss_test_history))
+
+        self.training_model_statistics_dict = dict(final_loss_train=final_loss_train, min_loss_train=min_loss_train,
+                                                   final_loss_test=final_loss_test, min_loss_test=min_loss_test)
+
     def plot_training_history(self):
+
+        plotname = 'model_training/training_plots/model_' + str(self.max_epochs) + '.png'
+        f = plt.figure(figsize=(9, 4.8))
+
         plt.xlabel("epochs")
         plt.ylabel("loss")
         plt.title("Check losses for overfitting")
+        plt.suptitle(str(self.training_model_statistics_dict), fontsize=9)
         plt.plot(self.loss_train_history, label='loss_train_history')
         plt.plot(self.loss_test_history, label='loss_test_history')
         plt.legend()
+        plt.savefig(plotname)
         plt.show()
+
 
     def evaluate(model, data_loader, loss_history):
         model.eval()
