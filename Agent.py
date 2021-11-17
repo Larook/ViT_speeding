@@ -5,6 +5,8 @@ import pybullet as pb
 import pygame as pygame
 from matplotlib import pyplot as plt
 
+import Environment
+
 
 class Agent:
     id: int
@@ -15,14 +17,20 @@ class Agent:
     step_angle = 0.2
     step_velocity = 0.2
 
-    def __init__(self, urdf_path: str):
-        self.pose = [0., 0., 0.1]
-        self.orientation = [0, 0, math.pi / 2]
-        agent_id = pb.loadURDF(urdf_path, self.pose, pb.getQuaternionFromEuler(self.orientation))
+    def __init__(self, urdf_path: str, load_stl=False):
+        # self.pose = [0., 0., 0.1]
+        self.pose = [0., 0., 0.]
+        # self.orientation = [0, 0, math.pi / 2]
+        # self.orientation = [math.pi/2, 0, math.pi]
+        self.orientation = [0, 0, math.pi]
+
+        agent_id = pb.loadURDF(urdf_path, self.pose, pb.getQuaternionFromEuler(self.orientation), useFixedBase=1)
+        # agent_id = pb.loadURDF(urdf_path, self.pose, pb.getQuaternionFromEuler(self.orientation))
         self.id = agent_id
+
         pb.changeDynamics(bodyUniqueId=self.id,
                           linkIndex=self.id,
-                          mass=1.1,  # this mass works with the box_example.urdf but doesnt with other boxes
+                          mass=300,  # this mass works with the box_example.urdf but doesnt with other boxes
                           lateralFriction=sys.maxsize,
                           spinningFriction=sys.maxsize,
                           rollingFriction=sys.maxsize,
@@ -31,6 +39,8 @@ class Agent:
                           angularDamping=0.0,
                           contactStiffness=-1,
                           contactDamping=-1)
+        pb.changeVisualShape(self.id, linkIndex=-1, rgbaColor=[0.6, 0, 0.2, 1])
+        # pb.changeVisualShape(self.id, linkIndex=-1, rgbaColor=[0.5, 0.5, 0.5, 1])
 
         self.steering_angle_slider = pb.addUserDebugParameter("angle", -math.pi/2, math.pi/2, 0)
         self.velocity_slider = pb.addUserDebugParameter("v", 0, 30, 0)
@@ -41,17 +51,14 @@ class Agent:
 
     def take_image(self, display=False):
         res = 400
-        # res = 256
-        # target = self.pose + np.dot(self.orientation, [0, 0, 1.0, 1.0])[0:3]
-        # print("target", target)
-        # up = np.dot(self.orientation, [0, -1.0, 0, 1.0])[0:3]
 
         eye, orient = pb.getBasePositionAndOrientation(self.id)
-        target = np.add(eye, [0, 100, 2])  # target = eye + np.matmul(orient, [0, 0, 10, 0])#[0:3]
-        up = [0, 10, 10]
+        eye = np.add(eye, [0, 0.065, 0.65])
+        target = np.add(eye, [0, 100, -0.2])  # target = eye + np.matmul(orient, [0, 0, 10, 0])#[0:3]
+        up = [0, 20, 10]
 
         view_matrix = pb.computeViewMatrix(eye, target, up)
-        projection_matrix = pb.computeProjectionMatrixFOV(40, 1, 0.01, 100)
+        projection_matrix = pb.computeProjectionMatrixFOV(40, 1, 1, 300)
 
         img, _, _ = pb.getCameraImage(res, res, view_matrix, projection_matrix, shadow=1)[2:]
         if display:
@@ -88,7 +95,8 @@ class Agent:
     def collision_detected(self):
         """ returns True when agent is in collision """
         contact_points = pb.getContactPoints(bodyA=self.id)  # , physicsClientId=1)
-        if len(contact_points) > 4:
+        print("contact_points", contact_points)
+        if len(contact_points) > 1:
             return True
         return False
 
@@ -104,7 +112,7 @@ class Agent:
         pose, _ = pb.getBasePositionAndOrientation(self.id)
         # print("pose", pose)
         pose_x = pose[0]
-        if pose_x > 1.8 or pose_x < -1.8:
+        if pose_x > 2.2 or pose_x < -2.2:
             return False
         return True
 

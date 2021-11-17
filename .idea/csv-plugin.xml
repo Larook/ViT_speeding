@@ -24,6 +24,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/SimulationData.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/SimulationImageDataset.py">
           <value>
             <Attribute>
@@ -45,7 +52,21 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/ViT_generate_data.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/ViT_train_model.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/__login_wandb_pwd.txt">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -115,6 +136,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/model_training/data/03-11_all_training_data/get_all_3-11_pickles_here.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/model_training/data/29-09_11:08_training_data.csv">
           <value>
             <Attribute>
@@ -172,6 +200,13 @@
           </value>
         </entry>
         <entry key="/simulation_use_ViT.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/sweep_config.py">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -241,6 +276,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/urdfs/real_cars/honda.urdf">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/urdfs/surroundings/background.urdf">
           <value>
             <Attribute>
@@ -249,6 +291,13 @@
           </value>
         </entry>
         <entry key="/urdfs/surroundings/ground.urdf">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/usr/lib/python3.8/pprint.py">
           <value>
             <Attribute>
               <option name="separator" value="," />

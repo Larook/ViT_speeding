@@ -24,14 +24,15 @@ from ViTModelGenerator import ViTRegression
 class TestViTRegression(TestCase):
 
     def setUp(self) -> None:
-        self.dir_path = '../model_training/data/30-09_18:06_training_data/'
+        # self.dir_path = '../model_training/data/30-09_18:06_training_data/'
+        self.pickle_df_path = '../model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'
 
         self.params = dict(image_size=256, patch_size=8, num_outputs=1, channels=1,
                               dim=64, depth=1, heads=2, mlp_dim=128)
 
         model = ViTRegression(**self.params)
 
-        model.load_dataloaders(dir_path=self.dir_path)
+        model.load_dataloaders(pickle_df_path=self.pickle_df_path)
         pass
 
     def tearDown(self) -> None:
@@ -40,7 +41,7 @@ class TestViTRegression(TestCase):
     def test_forward(self):
         model = ViTRegression(**self.params)
 
-        model.load_dataloaders(dir_path=self.dir_path)
+        model.load_dataloaders(pickle_df_path=self.pickle_df_path)
         model.eval()
 
         for i, [imgs, angles, vels] in enumerate(model.train_dataloader):

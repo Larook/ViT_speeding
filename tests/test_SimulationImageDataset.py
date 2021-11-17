@@ -18,6 +18,7 @@ class TestSimulationImageDataset(TestCase):
         print("main_df", main_df)
         pass
 
+
     def tearDown(self):
         pass
 
@@ -67,7 +68,6 @@ class TestSimulationImageDataset(TestCase):
             print('train_angles[0]', train_angles[0], 'train_vels[0]', train_vels[0], 'train_imgs[0]', train_imgs[0])
             image = Image.fromarray(train_imgs[0], 'RGB')
             image.show()
-
 
 
 if __name__ == '__main__':

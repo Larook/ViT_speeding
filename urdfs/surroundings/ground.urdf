@@ -5,13 +5,20 @@
 
     <visual>
       <geometry>
-        <box size="4 40 0.001"/>
+        <box size="4 80 0.001"/>
       </geometry>
 
       <material name="asphalt">
-        <color rgba="0.2 0.2 0.3 1"/>
+<!--        <color rgba="0.2 0.2 0.3 1"/>-->
       </material>
+
     </visual>
+
+    <collision>
+      <geometry>
+        <box size="4 80 0.001"/>
+      </geometry>
+    </collision>
 
   </link>
 
@@ -19,13 +26,20 @@
 
     <visual>
       <geometry>
-        <box size="20 40 0.000001"/>
+        <box size="40 80 0.000001"/>
       </geometry>
 
       <material name="grass">
         <color rgba="0.5 0.8 0.4 1"/>
       </material>
     </visual>
+
+<!--    <collision>-->
+<!--      <geometry>-->
+<!--        <box size="20 40 0.0000001"/>-->
+<!--      </geometry>-->
+<!--    </collision>-->
+
   </link>
 
 

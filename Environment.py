@@ -24,60 +24,79 @@ class Environment():
     agent: Agent
     env_pb_obstacle_ids = []
 
-    horizon_middle_point = [0, 8.4, 0.2]
-    obst_quat = pb.getQuaternionFromEuler([0, 0, math.pi/2])
+    horizon_middle_point = [0, 8.4, 0]
+    obst_quat = pb.getQuaternionFromEuler([0, 0, 0])
 
     dist_per_step = 0.0005
 
-    def __init__(self, dt):
-        physicsClient = pb.connect(pb.GUI)
+    def __init__(self, dt, ai_steering, difficulty_distance):
+
+        self.difficulty_distance = difficulty_distance
+
+        if not pb.isConnected():
+            physicsClient = pb.connect(pb.GUI)
         # physicsClient = pb.connect(pb.UDP, "192.168.0.10")
         # physicsClient = pb.connect(pb.TCP, "localhost", 6667)
         while not pb.isConnected():
             pass
+
         self.sim_dt = dt
         pb.setTimeStep(self.sim_dt)
         pb.setGravity(0, 0, -9.8)
         pb.setAdditionalSearchPath(pybullet_data.getDataPath())
-        planeId = pb.loadURDF('plane.urdf')
+        planeId = pb.loadURDF('plane.urdf', basePosition=[0, 0, -0.01])
 
         plane_id = pb.loadURDF("urdfs/surroundings/ground.urdf", basePosition=[0, 3, 0], useFixedBase=1)
-        background_id = pb.loadURDF("urdfs/surroundings/background.urdf", basePosition=[0, 20, 0],
-                                    baseOrientation=pb.getQuaternionFromEuler((math.pi/2, math.pi/2, 0)),
+        pb.changeVisualShape(plane_id, -1, textureUniqueId=pb.loadTexture('urdfs/surroundings/asphalt.png'))
+        pb.changeVisualShape(plane_id, 0, textureUniqueId=pb.loadTexture('urdfs/surroundings/smaller_0.png'))
+
+        background_id = pb.loadURDF("urdfs/surroundings/background.urdf", basePosition=[0, 40, 7],  # 20
+                                    # baseOrientation=pb.getQuaternionFromEuler((math.pi/2, math.pi, 0)),
+                                    baseOrientation=pb.getQuaternionFromEuler((math.pi/2, math.pi, math.pi)),
                                     useFixedBase=1)
+        pb.changeVisualShape(background_id, -1, textureUniqueId=pb.loadTexture('urdfs/surroundings/smaller_0.png'))
 
         # custom sliders to tune parameters (name of the parameter,range,initial value)
         # xin = pb.addUserDebugParameter("x", -0.224, 0.224, 0)
         # yin = pb.addUserDebugParameter("y", -0.224, 0.224, 0)
         # zin = pb.addUserDebugParameter("z", 0, 1., 0.5)
-        self.training_data = SimulationData()
 
-    def get_random_hor_pose(self):
+        if not ai_steering:
+            self.training_data = SimulationData()
+        self.spawn_agent()
+
+
+    def get_random_spawn_pose(self):
         # make sure that the positions are within ranges for each line
         car_width = 0.7
         lane_xs = [-1.5, -0.5, 0.5, 1.5]
-        return np.add(self.horizon_middle_point, [np.random.choice(lane_xs), np.random.uniform(0.4, 60), 0])
+        return np.add(self.horizon_middle_point, [np.random.choice(lane_xs), np.random.uniform(0.4, self.difficulty_distance), 0])
 
     def spawn_agent(self):
-        self.agent = Agent(urdf_path="urdfs/agent.urdf")
+        self.agent = Agent(urdf_path="urdfs/real_cars/bmw_z4.urdf")
+        # self.agent = Agent(urdf_path="urdfs/real_cars/fiat_500.urdf")
+        # self.agent = Agent(urdf_path="urdfs/real_cars/honda.urdf")
+        # self.agent = Agent(urdf_path="urdfs/real_cars/mercedes_slk.urdf")
+        # self.agent = Agent(urdf_path="urdfs/real_cars/van_car.urdf")
+        # self.agent = Agent(urdf_path="urdfs/real_cars/volga.urdf")
+
         self.agent_id = self.agent.id
 
     def run(self, keyboard_steering, ai_steering, **kwargs):
         """ whole procedure of creating a simulation
         moves objects, resets their position and makes sure that agent saves images"""
 
-        def spawn_random_obstacles():
-            # spawns random obstacle from directory at the horizon
-            for i, urdf in enumerate(os.listdir(os.getcwd() + '/urdfs/obstacles/')):
-                print("urdf=", urdf)
-                obs_id = pb.loadURDF(os.getcwd() + '/urdfs/obstacles/' + urdf, self.get_random_hor_pose(), self.obst_quat)
-                self.randomize_color(obs_id)
+        def spawn_random_obstacles_cars():
+            dir_with_cars = os.path.join(os.getcwd(), 'urdfs/real_cars')
+            for i, file in enumerate(os.listdir(dir_with_cars)):
+                print("file=", file)
+                if file.endswith('.urdf'):
+                    # obs_id = pb.loadURDF(os.path.join(dir_with_cars, file), self.get_random_spawn_pose(), self.obst_quat, useFixedBase=1)
+                    obs_id = pb.loadURDF(os.path.join(dir_with_cars, file), self.get_random_spawn_pose(), self.obst_quat)
+                    pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=get_random_color())
+                    self.env_pb_obstacle_ids.append(obs_id)
 
-                self.env_pb_obstacle_ids.append(obs_id)
-            pass
-
-        spawn_random_obstacles()
-
+        spawn_random_obstacles_cars()
         # print("kwargs['ai_model']", kwargs['ai_model'])
 
         if keyboard_steering:
@@ -88,7 +107,7 @@ class Environment():
         print("Simulation stopped")
         return None
 
-    def move_and_get_obstacle_idx_to_reset(self, v_y :float) -> list:
+    def move_and_get_obstacle_idx_to_reset(self, v_y: float) -> list:
         idx_to_remove = []
 
         for i in self.env_pb_obstacle_ids:
@@ -102,7 +121,7 @@ class Environment():
         for i in idx_to_reset:
             print("resets the position")
             self.randomize_color(i)
-            pb.resetBasePositionAndOrientation(i, self.get_random_hor_pose(), self.obst_quat)
+            pb.resetBasePositionAndOrientation(i, self.get_random_spawn_pose(), self.obst_quat)
         pass
 
     def set_obstacles_velocity(self):
@@ -112,7 +131,7 @@ class Environment():
     def randomize_color(self, obs_id):
         # doesnt work! Dont know why
         for joint in range(10):
-            pb.changeVisualShape(obs_id, joint, rgbaColor=[np.random.uniform(0, 1), np.random.uniform(0, 1), np.random.uniform(0, 1), 1], physicsClientId=0)
+            pb.changeVisualShape(obs_id, joint, rgbaColor=get_random_color(), physicsClientId=0)
         return None
 
     def gather_data(self):
@@ -124,7 +143,11 @@ class Environment():
             # if agent in collision then stop the game
             can_proceed = not self.agent.collision_detected() and self.agent.is_on_the_lane()
 
+            # update camera pose
+            self.set_cool_game_vibe_camera_position()
+
             # take and save the image
+            # img = self.agent.take_image(display=False)
             img = self.agent.take_image(display=False)
 
             # save the action to take for current img
@@ -197,3 +220,58 @@ class Environment():
             sg.popup_cancel("Ok saving the trajectories")
             return True
 
+    def set_cool_game_vibe_camera_position(self):
+        default_camera_view = pb.getDebugVisualizerCamera()
+        cam_dist = default_camera_view[10]
+        cam_target = default_camera_view[11]
+        cam_yaw = default_camera_view[8]
+        cam_pitch = default_camera_view[9]
+
+        # pb.resetDebugVisualizerCamera(cam_dist, 0, cam_pitch-10, np.add(cam_target, [0, 1.8, -0.4]))
+
+        agent_pose, _ = pb.getBasePositionAndOrientation(self.agent_id)
+        pb.resetDebugVisualizerCamera(cam_dist, 0, -20, np.add(agent_pose, [0, 2.8, -0.4]))
+
+def get_random_color():
+    """ example [0, 0.3, 1, 1] """
+    colors = [
+              [0.2, 0.1, 0.05, 1],
+              # [0.2, 0.6, 0.05, 1],
+              [0.6, 0.1, 0.3, 1],
+              [0.05, 0.15, 0.5, 1],
+              [0.7, 0.7, 0.7, 1],
+              [0.1, 0.1, 0.15, 1],
+              [0.9, 0.9, 0.9, 1],
+              [0.1, 0.1, 0.6, 1],
+              ]
+    rand_i = np.random.randint(0, len(colors))
+    return colors[rand_i]
+
+def load_multibody(is_stl, file_path, texture_path, scale, pos, rpy_orient):
+    print("(os.getcwd()) =", os.getcwd())
+
+    visualShapeId = pb.createVisualShape(
+        shapeType=pb.GEOM_MESH,
+        fileName=file_path,
+        rgbaColor=None,
+        meshScale=[scale, scale, scale])
+
+    collisionShapeId = pb.createCollisionShape(
+        shapeType=pb.GEOM_MESH,
+        fileName=file_path,
+        meshScale=[scale, scale, scale])
+
+    multiBodyId = pb.createMultiBody(
+        baseMass=-1,  # make non static
+        baseCollisionShapeIndex=collisionShapeId,
+        baseVisualShapeIndex=visualShapeId,
+        basePosition=pos,
+        baseInertialFramePosition=[0, 0, math.pi / 2],
+        baseOrientation=pb.getQuaternionFromEuler(rpy_orient))
+
+    if texture_path:
+        texture_paths = '/WorkCell/rockwool/rockwool_skin_v1.png'
+        textureId = pb.loadTexture(texture_paths)
+        pb.changeVisualShape(multiBodyId, -1, textureUniqueId=textureId)
+
+    return multiBodyId

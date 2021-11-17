@@ -5,6 +5,8 @@ _inspirational_papers/
 #pyCharm
 .idea/
 
+__pycache__/
+
 # Compiled source #
 ###################
 *.com
@@ -28,3 +30,8 @@ _inspirational_papers/
 *.rar
 *.tar
 *.zip
+
+/wandb/
+/model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl
+/model_training/data/whole_15-11_day_training_data.pkl
+/model_training/data/[0-9]*

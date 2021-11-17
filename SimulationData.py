@@ -14,6 +14,7 @@ class SimulationData():
     rows_max = 20
 
     def __init__(self, create=True):
+        print("os.getcwd()", os.getcwd())
         self.start_time = time.time()
         self.rows_in_memory = 0
         self.memory = []
@@ -45,6 +46,34 @@ class SimulationData():
 
         pass
 
+    def get_load_pickles_of_one_day_to_df(self, dir_name_begin, create=True, **kwargs):
+        # go through the directory with pickles as parts and concat the dfs to get the full df
+        print("dir_name_begin", dir_name_begin)
+
+        if not create:
+            self.dir_path = kwargs['dir_path']
+            print("self.dir_path =", self.dir_path)
+
+        main_df = None
+        i = 0
+        for dir_name_mins in (file for file in os.listdir(self.dir_path) if file.startswith(dir_name_begin)):
+            print("dir_name_mins", dir_name_mins)
+            for file in (file for file in os.listdir(self.dir_path+'/'+dir_name_mins) if file.endswith('.pkl')):
+                print("file", file)
+                if i == 0:
+                    main_df = pd.read_pickle(self.dir_path+'/'+dir_name_mins + '/' + file)
+                else:
+                    df = pd.read_pickle(self.dir_path+'/'+dir_name_mins + '/' + file)
+                    # print("df.columns", df.columns)
+                    main_df = main_df.append(df, ignore_index=True)
+                    print("main_df.size", main_df.size)
+                i += 1
+        # print("end of files")
+
+        # return None
+        return main_df
+
+
     def get_load_pickles_to_df(self, create=True, **kwargs):
         # go through the directory with pickles as parts and concat the dfs to get the full df
         # print("\n\nself.dir_path", self.dir_path)
@@ -66,9 +95,10 @@ class SimulationData():
 
         return main_df
 
-    def load_dfs_from_pickles(self, create, training_percentage, dir_path, shuffle):
+    def load_dfs_from_pickles(self, create, training_percentage, pickle_df_path, shuffle):
         # load the pickles to df
-        df = self.get_load_pickles_to_df(create, dir_path=dir_path)
+        # df = self.get_load_pickles_to_df(create, dir_path=dir_path)
+        df = pd.read_pickle(pickle_df_path)
 
         # shuffle df
         if shuffle:

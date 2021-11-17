@@ -6,13 +6,24 @@
 
     <visual>
       <geometry>
-        <box size="80 30 0.0001"/>
+<!--        <box size="80 30 0.0001"/>-->
+<!--        <box size="38.4 25.6 0.0001"/>-->
+        <box size="80 20 0.0001"/>
       </geometry>
 
-      <material name="sky">
-        <color rgba="0.53 0.80 0.96 1"/>
-      </material>
+<!--      <material name="sky">-->
+<!--        <name>"horizon_0.jpg"</name>-->
+<!--        <color rgba="0.53 0.80 0.96 1"/>-->
+<!--      </material>-->
     </visual>
+
+<!--    <visual>-->
+<!--      <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--      <geometry>-->
+<!--        <mesh filename="horizon_0.jpg"/>-->
+<!--      </geometry>-->
+<!--    </visual>-->
+
 
 
   </link>

@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<robot name="random_box">
+  <link name="box">
+
+    <inertial>
+      <mass value="300"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.9" ixy="0.9" ixz="0.9" iyy="0.9" iyz="0.9" izz="0.9"/>
+    </inertial>
+
+    <visual>
+      <origin rpy="1.57 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="models/bmw_z4.stl" scale="0.08 0.08 0.08"/>
+      </geometry>
+    </visual>
+
+    <collision>
+<!--      <geometry>-->
+<!--        <mesh filename="models/bmw_z4.stl" scale="0.08 0.08 0.08"/>-->
+<!--      </geometry>-->
+
+      <geometry>
+        <box size="0.9 0.7 0.6"/>
+      </geometry>
+
+      <surface>
+        <friction>
+          <ode>
+            <mu>100000000.0</mu>
+            <mu2>100000000.0</mu2>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <min_depth>0.003</min_depth>
+          </ode>
+        </contact>
+      </surface>
+
+    </collision>
+
+  </link>
+</robot>
