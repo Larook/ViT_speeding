@@ -179,9 +179,6 @@ class Environment():
     def evaluate_ai(self, ai_model):
         print("*********************** evaluate_ai ***********************")
         preprocess = transforms.Compose([transforms.Resize((256, 256)),
-                                               transforms.Grayscale(num_output_channels=1),
-                                               # transforms.RandomVerticalFlip(),
-                                               # transforms.RandomHorizontalFlip(),
                                                transforms.ToTensor()
                                                ])
         can_proceed = True

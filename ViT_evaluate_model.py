@@ -12,6 +12,8 @@ from PIL import Image
 from matplotlib import pyplot as plt
 
 from Environment import Environment
+from ResnetModelGenerator import ResnetRegression
+from ViTModelGenerator import ViTRegression
 from ViTModelGenerator import ViTRegression
 
 DETLA_T = 0.1
@@ -29,13 +31,21 @@ DETLA_T = 0.1
 
 if __name__ == "__main__":
 
-    config = dict(learning_rate=0.003, epochs=30, batch_size=10, optimizer='adam')
-    params = dict(image_size=256, patch_size=8, num_outputs=1, channels=1,
-                  dim=64, depth=1, heads=2, mlp_dim=128)
+    do_vit = True
+    # do_vit = False
 
-    model = ViTRegression(wandb_config=config, **params)
-    # model.load_state_dict(torch.load('model_training/trained_models/model_100_data_3-11.pth'))
-    model.load_state_dict(torch.load('model_training/trained_models/model_100.pth'))
+    if do_vit:
+        params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3,
+                      dim=64, depth=1, heads=2, mlp_dim=128)
+        config_ViT = dict(model='ViT', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+        model = ViTRegression(wandb_config=config_ViT, **params)
+        model.load_state_dict(torch.load('model_training/trained_models/model_20_ViT.pth'))
+
+    else:
+        config_resnet = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+        model = ResnetRegression(wandb_config=config_resnet)
+        model.load_state_dict(torch.load('model_training/trained_models/model_20_resnet.pth'))
+
     model.eval()
 
     # define environment

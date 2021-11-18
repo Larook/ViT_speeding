@@ -57,9 +57,10 @@ class ResnetRegression(nn.Module):
                                                                       pickle_df_path=pickle_df_path, shuffle=True)
 
         train_transforms = transforms.Compose([transforms.Resize((256, 256)),
-                                               transforms.Grayscale(num_output_channels=3),
-                                               # transforms.RandomVerticalFlip(),
-                                               transforms.RandomHorizontalFlip(),
+                                               # transforms.Grayscale(num_output_channels=1),
+                                               transforms.ColorJitter(brightness=.5, hue=.3),
+                                               transforms.RandomEqualize(),
+                                               transforms.RandomVerticalFlip(),
                                                transforms.ToTensor()
                                                ])
 
@@ -71,78 +72,10 @@ class ResnetRegression(nn.Module):
         self.test_dataloader = DataLoader(dataset_test, batch_size=self.wandb_config['batch_size'], shuffle=True)
         pass
 
-    # def load_split_train_test(self, train_data, test_data, valid_size=.2):
-    #     train_transforms = transforms.Compose([transforms.Resize((256, 256)),
-    #                                            transforms.Grayscale(num_output_channels=1),
-    #                                            transforms.RandomVerticalFlip(),
-    #                                            transforms.RandomHorizontalFlip(),
-    #                                            transforms.ToTensor(),
-    #                                            ])
-    #
-    #     test_transforms = transforms.Compose([transforms.Resize((256, 256)),
-    #                                           transforms.Grayscale(num_output_channels=1),
-    #                                           transforms.RandomVerticalFlip(),
-    #                                           transforms.RandomHorizontalFlip(),
-    #                                           transforms.ToTensor(),
-    #                                           ])
-    #
-    #     # train_data = datasets.ImageFolder(data_dir, transform=train_transforms)
-    #     # test_data = datasets.ImageFolder(data_dir, transform=test_transforms)
-    #
-    #
-    #     num_train = len(train_data)
-    #     indices = list(range(num_train))
-    #     split = int(np.floor(valid_size * num_train))
-    #     np.random.shuffle(indices)
-    #
-    #     from torch.utils.data.sampler import SubsetRandomSampler
-    #
-    #     train_idx, test_idx = indices[split:], indices[:split]
-    #     train_sampler = SubsetRandomSampler(train_idx)
-    #     test_sampler = SubsetRandomSampler(test_idx)
-    #
-    #     self.trainloader = torch.utils.data.DataLoader(train_data, sampler=train_sampler, batch_size=64)
-    #     self.testloader = torch.utils.data.DataLoader(test_data, sampler=test_sampler, batch_size=64)
-
-
-    # def forward(self, img, mask=None):
-    #     p = self.patch_size
-    #
-    #     x = rearrange(img, 'b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1=p, p2=p).to(self.device)  # height weight channel batch
-    #     x = self.patch_to_embedding(x)
-    #
-    #     cls_tokens = self.cls_token.expand(img.shape[0], -1, -1)
-    #     # print('cls_tokens', cls_tokens)
-    #
-    #     x = torch.cat((cls_tokens, x), dim=1)
-    #     x += self.pos_embedding
-    #     x = self.transformer(x, mask)
-    #
-    #     x = self.to_cls_token(x[:, 0])
-    #     # print('x', x)
-    #     return self.mlp_head(x)
-
-    # def load_simulation_data(self, main_df, shuffle=True):
-    #     # row = dict(time=time.time()-self.start_time, steering_angle=angle, velocity_y=v_y, image=img)
-    #     main_df = main_df.sample(frac=1)
-    #
-    #     # inputs are just images or maybe images + time
-    #     # outputs should be steering angle + velocity
-    #
-    #     self.inputs = torch.tensor(main_df['image'].values)
-    #     self.outputs = torch.tensor(main_df['steering_angle'].values)
-    #     pass
+    def forward(self, img, mask=None):
+        return self.model(img.to(self.device))
 
     def train_epochs(self):
-
-        def train_log(loss, example_ct, epoch, train=True):
-            # Where the magic happens
-            if train:
-                wandb.log({"epoch": epoch, "loss_train": loss, 'step_train': example_ct}, step=example_ct)
-            else:
-                wandb.log({"epoch": epoch, "loss_test": loss, 'step_test': example_ct}, step=example_ct)
-            # print(f"Loss after " + str(example_ct).zfill(5) + f" examples: {loss:.3f}")
-
         with wandb.init(config=self.wandb_config):
             config = wandb.config
             print("train_epochs, config", config)
@@ -178,7 +111,6 @@ class ResnetRegression(nn.Module):
 
                     example_ct_train += len(imgs)
                     batch_ct_train += 1
-                    # train_log(loss.item(), example_ct_train, epoch, train=True)
 
                 self.loss_train_history.append(np.mean(running_loss_train))
 
@@ -194,10 +126,11 @@ class ResnetRegression(nn.Module):
                     running_loss_test.append(loss.item())
                     example_ct_test += len(imgs)
                     batch_ct_test += 1
-                    # train_log(loss.item(), example_ct_test, epoch, train=False)
 
                 wandb.log({"epoch": epoch, "avg_loss_train": np.mean(running_loss_train),
-                           "avg_loss_test": np.mean(running_loss_test)}, step=epoch)
+                           "avg_loss_test": np.mean(running_loss_test),
+                           "example": [wandb.Image(img) for img in imgs]},
+                          step=epoch)
 
                 # wandb.log({"loss": np.mean(running_loss_test), "epoch": epoch})
                 self.loss_test_history.append(np.mean(running_loss_test))

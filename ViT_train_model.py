@@ -35,7 +35,8 @@ def model_pipeline(hyperparameters):
     """ based on https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Simple_PyTorch_Integration.ipynb#scrollTo=IEUSDJByP_Yk """
 
     print("--------- hyperparameters ---------", hyperparameters)
-    training_pickle_df_path = 'model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'
+    # training_pickle_df_path = 'model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'
+    training_pickle_df_path = 'model_training/data/whole_15-11_day_training_data.pkl'
 
     # tell wandb to get started
     # with wandb.init(project="pytorch-demo_vit", config=hyperparameters):
@@ -49,7 +50,7 @@ def model_pipeline(hyperparameters):
         wandb.config.optimizer = hyperparameters['optimizer']
         wandb.config.model = hyperparameters['model']
 
-        params = dict(image_size=256, patch_size=8, num_outputs=1, channels=1,
+        params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3,
                       dim=64, depth=1, heads=2, mlp_dim=128)
 
         if wandb.config.model == 'ViT':
@@ -62,12 +63,12 @@ def model_pipeline(hyperparameters):
 
         model.train_epochs()
         model.plot_training_history()
-    model.to_onnx()
-    wandb.save("model.onnx")
+    # model.to_onnx()
+    # wandb.save("model.onnx")
 
 
 def run_regular_wandb_training():
-    wandb.login(key='015c0cfe2e5003fb319b237200741f4647f204c3')
+    wandb.login(key=open('wandb/__login_wandb_pwd.txt', 'r').read())
     wandb.init(project="my-test-project", entity="larook")
 
 
@@ -85,7 +86,7 @@ def run_sweeps_wandb_training():
             print("hello from train")
             pprint.pprint(config)
 
-            params = dict(image_size=256, patch_size=8, num_outputs=1, channels=1,
+            params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3,
                           dim=64, depth=1, heads=2, mlp_dim=128)
             model = ViTRegression(wandb_config=config, **params)
 
@@ -108,6 +109,7 @@ def run_sweeps_wandb_training():
 if __name__ == "__main__":
     # training_data_dir_path = 'model_training/data/03-11_10:23_training_data/'
     # https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb#scrollTo=r4VjKui20N3j
+
     run_regular_wandb_training()
     # run_sweeps_wandb_training()
 
