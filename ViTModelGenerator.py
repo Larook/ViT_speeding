@@ -183,9 +183,9 @@ class ViTRegression(nn.Module):
                 running_loss_train = []
                 running_loss_test = []
 
+                self.train()
                 for i, [imgs, angles, vels] in enumerate(self.train_dataloader):
                     imgs, angles, vels = imgs.to(self.device), angles.to(self.device), vels.to(self.device)
-                    self.train()
                     self.optimizer.zero_grad()
                     output = self.forward(imgs)
                     target = angles.unsqueeze(1).float()
@@ -200,9 +200,9 @@ class ViTRegression(nn.Module):
 
                 self.loss_train_history.append(np.mean(running_loss_train))
 
+                self.eval()
                 for j, [imgs, angles, vels] in enumerate(self.test_dataloader):
                     imgs, angles, vels = imgs.to(self.device), angles.to(self.device), vels.to(self.device)
-                    self.eval()
                     self.optimizer.zero_grad()
                     output = self.forward(imgs)
                     target = angles.unsqueeze(1).float()

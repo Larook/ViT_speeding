@@ -6,6 +6,10 @@ sweep_config = {
     'metric': {'name': 'loss', 'goal': 'minimize'},
 
     'parameters': {
+                    'model': {'values': [
+                        # 'ViT',
+                        'resnet'
+                    ]},
 
                     'epochs': {'value': 20},
 

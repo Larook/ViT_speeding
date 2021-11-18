@@ -8,11 +8,15 @@ import numpy as np
 import pybullet as pb
 import pybullet_data
 import torch
+import torchsummary as torchsummary
 from PIL import Image
 from matplotlib import pyplot as plt
 
 from Environment import Environment
 from ViTModelGenerator import ViTRegression
+from ResnetModelGenerator import ResnetRegression
+
+import torch.onnx
 
 import wandb
 import pprint
@@ -43,11 +47,17 @@ def model_pipeline(hyperparameters):
         wandb.config.epochs = hyperparameters['epochs']
         wandb.config.batch_size = hyperparameters['batch_size']
         wandb.config.optimizer = hyperparameters['optimizer']
+        wandb.config.model = hyperparameters['model']
 
         params = dict(image_size=256, patch_size=8, num_outputs=1, channels=1,
                       dim=64, depth=1, heads=2, mlp_dim=128)
 
-        model = ViTRegression(wandb_config=hyperparameters, **params)
+        if wandb.config.model == 'ViT':
+            model = ViTRegression(wandb_config=hyperparameters, **params)
+        elif wandb.config.model == 'resnet':
+            model = ResnetRegression(wandb_config=hyperparameters)
+            # print('list(model.children())', list(model.children()))
+            # exit(1)
         model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
         model.train_epochs()
@@ -62,7 +72,8 @@ def run_regular_wandb_training():
 
 
     time_start = time.time()
-    config = dict(learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+    # config = dict(model='ViT', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+    config = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
     model_pipeline(hyperparameters=config)
     print('GPU device time taken: ', time.time()-time_start)
 
