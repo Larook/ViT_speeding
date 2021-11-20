@@ -1,22 +1,22 @@
-import math
-import os
-import random
-import sys
+# import math
+# import os
+# import random
+# import sys
 import time
 
-import numpy as np
-import pybullet as pb
-import pybullet_data
-import torch
-import torchsummary as torchsummary
-from PIL import Image
-from matplotlib import pyplot as plt
-
-from Environment import Environment
+# import numpy as np
+# import pybullet as pb
+# import pybullet_data
+# import torch
+# import torchsummary as torchsummary
+# from PIL import Image
+# from matplotlib import pyplot as plt
+#
+# from Environment import Environment
 from ViTModelGenerator import ViTRegression
 from ResnetModelGenerator import ResnetRegression
 
-import torch.onnx
+# import torch.onnx
 
 import wandb
 import pprint

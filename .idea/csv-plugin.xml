@@ -248,6 +248,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/training_notebook.ipynb">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/urdfs/agent.urdf">
           <value>
             <Attribute>
