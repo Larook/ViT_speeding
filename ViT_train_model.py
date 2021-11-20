@@ -73,8 +73,8 @@ def run_regular_wandb_training():
 
 
     time_start = time.time()
-    # config = dict(model='ViT', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
-    config = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+    config = dict(model='ViT', learning_rate=0.003, epochs=700, batch_size=10, optimizer='adam')
+    # config = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
     model_pipeline(hyperparameters=config)
     print('GPU device time taken: ', time.time()-time_start)
 
@@ -105,12 +105,14 @@ def run_sweeps_wandb_training():
     # run the function using sweep agent
     wandb.agent(sweep_id, train_with_wandb_sweeps, count=40)  # count=how many times to run different settings
 
+def say_hi():
+    print("hello from train")
 
 if __name__ == "__main__":
     # training_data_dir_path = 'model_training/data/03-11_10:23_training_data/'
     # https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb#scrollTo=r4VjKui20N3j
 
-    run_regular_wandb_training()
-    # run_sweeps_wandb_training()
+    # run_regular_wandb_training()
+    run_sweeps_wandb_training()
 
 

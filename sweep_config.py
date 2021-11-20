@@ -7,11 +7,11 @@ sweep_config = {
 
     'parameters': {
                     'model': {'values': [
-                        # 'ViT',
+                        'ViT',
                         'resnet'
                     ]},
 
-                    'epochs': {'value': 20},
+                    'epochs': {'value': 200},
 
                     'optimizer': {'values': ['adam', 'sgd']},
                     # 'fc_layer_size': {'values': [128, 256, 512]},

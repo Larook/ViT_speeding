@@ -60,7 +60,7 @@ class ResnetRegression(nn.Module):
                                                # transforms.Grayscale(num_output_channels=1),
                                                transforms.ColorJitter(brightness=.5, hue=.3),
                                                transforms.RandomEqualize(),
-                                               transforms.RandomVerticalFlip(),
+                                               # transforms.RandomVerticalFlip(),
                                                transforms.ToTensor()
                                                ])
 
@@ -137,7 +137,7 @@ class ResnetRegression(nn.Module):
 
         self.save_training_model_statistics()
 
-        model_save_path = 'model_training/trained_models/model_' + str(self.max_epochs) + '.pth'
+        model_save_path = 'model_training/trained_models/model_' + str(self.max_epochs) +'_' + str(self.wandb_config['model']) + '.pth'
         torch.save(self.state_dict(), model_save_path)
 
     def save_training_model_statistics(self):

@@ -52,6 +52,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/ViT_evaluate_model.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/ViT_generate_data.py">
           <value>
             <Attribute>
