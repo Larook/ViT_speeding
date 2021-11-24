@@ -1,10 +1,6 @@
 from SimulationData import SimulationData
 
 
-def test_get_together_data_from_the_same_day():
-    pass
-
-
 if __name__ == "__main__":
     dir_path = '.'
     dir_name_begin_day = '15-11_'

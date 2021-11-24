@@ -13,6 +13,7 @@ import time
 # from matplotlib import pyplot as plt
 #
 # from Environment import Environment
+from SimulationData import SimulationData
 from ViTModelGenerator import ViTRegression
 from ResnetModelGenerator import ResnetRegression
 
@@ -29,6 +30,10 @@ DETLA_T = 0.1
 - improve plots
     - for each plot add text message with the final training and testing loss
 """
+
+
+def say_hi():
+    print("hello from train")
 
 
 def model_pipeline(hyperparameters):
@@ -105,8 +110,16 @@ def run_sweeps_wandb_training():
     # run the function using sweep agent
     wandb.agent(sweep_id, train_with_wandb_sweeps, count=40)  # count=how many times to run different settings
 
-def say_hi():
-    print("hello from train")
+
+def make_training_dataset():
+    """ for running in the colab """
+    dir_path = 'model_training/data/'
+    dir_name_begin_day = '15-11_'
+    data = SimulationData(create=False)
+    main_df = data.get_load_pickles_of_one_day_to_df(create=False, dir_path=dir_path, dir_name_begin=dir_name_begin_day)
+    print("main_df", main_df)
+    main_df.to_pickle("whole_" + dir_name_begin_day + "day_training_data.pkl")
+
 
 if __name__ == "__main__":
     # training_data_dir_path = 'model_training/data/03-11_10:23_training_data/'

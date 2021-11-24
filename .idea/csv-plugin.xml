@@ -192,6 +192,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/model_training/data/get_data_from_all_day_here.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/model_training/main.py">
           <value>
             <Attribute>
