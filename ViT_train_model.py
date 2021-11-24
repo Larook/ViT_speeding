@@ -111,16 +111,6 @@ def run_sweeps_wandb_training():
     wandb.agent(sweep_id, train_with_wandb_sweeps, count=40)  # count=how many times to run different settings
 
 
-def make_training_dataset():
-    """ for running in the colab """
-    dir_path = 'model_training/data/'
-    dir_name_begin_day = '15-11_'
-    data = SimulationData(create=False)
-    main_df = data.get_load_pickles_of_one_day_to_df(create=False, dir_path=dir_path, dir_name_begin=dir_name_begin_day)
-    print("main_df", main_df)
-    main_df.to_pickle("whole_" + dir_name_begin_day + "day_training_data.pkl")
-
-
 if __name__ == "__main__":
     # training_data_dir_path = 'model_training/data/03-11_10:23_training_data/'
     # https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb#scrollTo=r4VjKui20N3j
