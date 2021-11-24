@@ -41,7 +41,8 @@ def model_pipeline(hyperparameters):
 
     print("--------- hyperparameters ---------", hyperparameters)
     # training_pickle_df_path = 'model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'
-    training_pickle_df_path = 'model_training/data/whole_15-11_day_training_data.pkl'
+    # training_pickle_df_path = 'model_training/data/whole_15-11_day_training_data.pkl'
+    training_pickle_df_path = 'model_training/data/whole_24-11_day_training_data.pkl'
 
     # tell wandb to get started
     # with wandb.init(project="pytorch-demo_vit", config=hyperparameters):
@@ -96,7 +97,8 @@ def run_sweeps_wandb_training():
             model = ViTRegression(wandb_config=config, **params)
 
             # training_pickle_df_path = 'model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'
-            training_pickle_df_path = 'model_training/data/whole_15-11_day_training_data.pkl'
+            # training_pickle_df_path = 'model_training/data/whole_15-11_day_training_data.pkl'
+            training_pickle_df_path = 'model_training/data/whole_24-11_day_training_data.pkl'
             model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
             model.train_epochs()
