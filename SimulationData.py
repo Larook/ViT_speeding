@@ -40,7 +40,7 @@ class SimulationData():
             # flush the memory to save the existing csv
             df = pd.DataFrame(self.memory)
 
-            df.to_pickle(self.filepath + "_p" + str(self.pickle_part) + ".pkl")
+            df.to_pickle(self.filepath + "_p" + str(self.pickle_part) + ".pkl", protocol=4)
             self.memory = []
             self.pickle_part += 1
 
