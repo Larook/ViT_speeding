@@ -117,7 +117,7 @@ if __name__ == "__main__":
     # training_data_dir_path = 'model_training/data/03-11_10:23_training_data/'
     # https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb#scrollTo=r4VjKui20N3j
 
-    # run_regular_wandb_training()
-    run_sweeps_wandb_training()
+    run_regular_wandb_training()
+    # run_sweeps_wandb_training()
 
 

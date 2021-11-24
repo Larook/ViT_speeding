@@ -42,6 +42,6 @@ tqdm==4.62.3
 transform3d==0.0.3
 typing-extensions==3.7.4.3
 urllib3==1.26.7
-wandb==0.12.6
+wandb==0.12.7
 Werkzeug==1.0.1
 yaspin==2.1.0
