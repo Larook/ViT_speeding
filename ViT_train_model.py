@@ -42,7 +42,8 @@ def model_pipeline(hyperparameters):
     print("--------- hyperparameters ---------", hyperparameters)
     # training_pickle_df_path = 'model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'
     # training_pickle_df_path = 'model_training/data/whole_15-11_day_training_data.pkl'
-    training_pickle_df_path = 'model_training/data/whole_24-11_day_training_data.pkl'
+    # training_pickle_df_path = 'model_training/data/whole_24-11_day_training_data.pkl'
+    training_pickle_df_path = 'model_training/data/whole_25-11_day_training_data.pkl'
 
     # tell wandb to get started
     # with wandb.init(project="pytorch-demo_vit", config=hyperparameters):
@@ -63,8 +64,6 @@ def model_pipeline(hyperparameters):
             model = ViTRegression(wandb_config=hyperparameters, **params)
         elif wandb.config.model == 'resnet':
             model = ResnetRegression(wandb_config=hyperparameters)
-            # print('list(model.children())', list(model.children()))
-            # exit(1)
         model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
         model.train_epochs()
@@ -79,7 +78,7 @@ def run_regular_wandb_training():
 
 
     time_start = time.time()
-    config = dict(model='ViT', learning_rate=0.003, epochs=700, batch_size=10, optimizer='adam')
+    config = dict(model='ViT', learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
     # config = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
     model_pipeline(hyperparameters=config)
     print('GPU device time taken: ', time.time()-time_start)
@@ -98,7 +97,8 @@ def run_sweeps_wandb_training():
 
             # training_pickle_df_path = 'model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'
             # training_pickle_df_path = 'model_training/data/whole_15-11_day_training_data.pkl'
-            training_pickle_df_path = 'model_training/data/whole_24-11_day_training_data.pkl'
+            # training_pickle_df_path = 'model_training/data/whole_24-11_day_training_data.pkl'
+            training_pickle_df_path = 'model_training/data/whole_25-11_day_training_data.pkl'
             model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
             model.train_epochs()
@@ -110,7 +110,7 @@ def run_sweeps_wandb_training():
     # start the sweeping project
     sweep_id = wandb.sweep(sweep_config, project="pytorch-sweeps-demo")
     # run the function using sweep agent
-    wandb.agent(sweep_id, train_with_wandb_sweeps, count=40)  # count=how many times to run different settings
+    wandb.agent(sweep_id, train_with_wandb_sweeps, count=100)  # count=how many times to run different settings
 
 
 if __name__ == "__main__":

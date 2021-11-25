@@ -11,7 +11,7 @@ sweep_config = {
                         'resnet'
                     ]},
 
-                    'epochs': {'value': 200},
+                    'epochs': {'value': 1000},
 
                     'optimizer': {'values': ['adam', 'sgd']},
                     # 'fc_layer_size': {'values': [128, 256, 512]},

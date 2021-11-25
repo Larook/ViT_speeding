@@ -6,7 +6,8 @@ def make_training_dataset():
     """ for running in the colab """
     dir_path = 'model_training/data/'
     # dir_name_begin_day = '15-11_'
-    dir_name_begin_day = '24-11_'
+    # dir_name_begin_day = '24-11_'
+    dir_name_begin_day = '25-11_'
 
     data = SimulationData(create=False)
 

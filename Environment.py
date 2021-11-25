@@ -47,7 +47,9 @@ class Environment():
         planeId = pb.loadURDF('plane.urdf', basePosition=[0, 0, -0.01])
 
         plane_id = pb.loadURDF("urdfs/surroundings/ground.urdf", basePosition=[0, 3, 0], useFixedBase=1)
-        pb.changeVisualShape(plane_id, -1, textureUniqueId=pb.loadTexture('urdfs/surroundings/asphalt.png'))
+        # pb.changeVisualShape(plane_id, -1, textureUniqueId=pb.loadTexture('urdfs/surroundings/asphalt.png'))
+        # pb.changeVisualShape(plane_id, -1, textureUniqueId=pb.loadTexture('urdfs/surroundings/asphalt_0.png'))
+        # pb.changeVisualShape(plane_id, -1, textureUniqueId=pb.loadTexture('urdfs/surroundings/asphalt_1.jpg'))
         pb.changeVisualShape(plane_id, 0, textureUniqueId=pb.loadTexture('urdfs/surroundings/smaller_0.png'))
 
         background_id = pb.loadURDF("urdfs/surroundings/background.urdf", basePosition=[0, 40, 7],  # 20

@@ -163,9 +163,7 @@ class ViTRegression(nn.Module):
                     self.optimizer.zero_grad()
                     output = self.forward(imgs)
                     target = angles.unsqueeze(1).float()
-                    loss = F.smooth_l1_loss(output, target)  # L1 loss for regression applications
-                    # loss.backward()
-                    # self.optimizer.step()
+                    loss = self.criterion(output, target)  # L1 loss for regression applications
                     running_loss_test.append(loss.item())
                     example_ct_test += len(imgs)
                     batch_ct_test += 1

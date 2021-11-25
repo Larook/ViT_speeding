@@ -9,7 +9,7 @@
       </geometry>
 
       <material name="asphalt">
-<!--        <color rgba="0.2 0.2 0.3 1"/>-->
+        <color rgba="0.2 0.2 0.3 1"/>
       </material>
 
     </visual>
