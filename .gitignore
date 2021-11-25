@@ -36,3 +36,4 @@ __pycache__/
 /model_training/data/whole_15-11_day_training_data.pkl
 #/model_training/data/[0-9]*
 /model_training/data/whole_24-11_day_training_data.pkl
+/model_training/data/whole_25-11_day_training_data.pkl

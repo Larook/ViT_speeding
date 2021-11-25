@@ -8,6 +8,7 @@ import numpy as np
 import torch
 import torchvision
 import torch.nn.functional as F
+
 import wandb
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
@@ -144,6 +145,11 @@ class ViTRegression(nn.Module):
                 self.train()
                 for i, [imgs, angles, vels] in enumerate(self.train_dataloader):
                     imgs, angles, vels = imgs.to(self.device), angles.to(self.device), vels.to(self.device)
+
+                    # img = imgs[0].cpu().permute(1, 2, 0).numpy()
+                    # plt.imshow(img)
+                    # plt.show()
+
                     self.optimizer.zero_grad()
                     output = self.forward(imgs)
                     target = angles.unsqueeze(1).float()
