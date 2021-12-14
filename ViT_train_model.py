@@ -73,14 +73,16 @@ def model_pipeline(hyperparameters):
     # wandb.save("model.onnx")
 
 
-def run_regular_wandb_training():
+def run_regular_wandb_training(model):
+
+
     wandb.login(key=open('wandb/__login_wandb_pwd.txt', 'r').read())
     wandb.init(project="my-test-project", entity="larook")
     # wandb.init(mode="disabled")
 
 
     time_start = time.time()
-    config = dict(model='ViT', learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
+    config = dict(model=model, learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
     # config = dict(model='resnet', learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
     model_pipeline(hyperparameters=config)
     print('GPU device time taken: ', time.time()-time_start)
@@ -119,7 +121,8 @@ if __name__ == "__main__":
     # training_data_dir_path = 'model_training/data/03-11_10:23_training_data/'
     # https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb#scrollTo=r4VjKui20N3j
 
-    run_regular_wandb_training()
+    run_regular_wandb_training(model='ViT')
+    run_regular_wandb_training(model='resnet')
     # run_sweeps_wandb_training()
 
 
