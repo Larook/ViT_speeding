@@ -57,13 +57,14 @@ def model_pipeline(hyperparameters):
         wandb.config.optimizer = hyperparameters['optimizer']
         wandb.config.model = hyperparameters['model']
 
-        params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3,
-                      dim=64, depth=1, heads=2, mlp_dim=128)
+        num_outputs = 2
+        # params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
+        params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
 
         if wandb.config.model == 'ViT':
             model = ViTRegression(wandb_config=hyperparameters, **params)
         elif wandb.config.model == 'resnet':
-            model = ResnetRegression(wandb_config=hyperparameters)
+            model = ResnetRegression(wandb_config=hyperparameters, num_outputs=num_outputs)
         model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
         model.train_epochs()
@@ -75,11 +76,12 @@ def model_pipeline(hyperparameters):
 def run_regular_wandb_training():
     wandb.login(key=open('wandb/__login_wandb_pwd.txt', 'r').read())
     wandb.init(project="my-test-project", entity="larook")
+    # wandb.init(mode="disabled")
 
 
     time_start = time.time()
     config = dict(model='ViT', learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
-    # config = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+    # config = dict(model='resnet', learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
     model_pipeline(hyperparameters=config)
     print('GPU device time taken: ', time.time()-time_start)
 
@@ -91,8 +93,8 @@ def run_sweeps_wandb_training():
             print("hello from train")
             pprint.pprint(config)
 
-            params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3,
-                          dim=64, depth=1, heads=2, mlp_dim=128)
+            # params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
+            params = dict(image_size=256, patch_size=8, num_outputs=2, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
             model = ViTRegression(wandb_config=config, **params)
 
             # training_pickle_df_path = 'model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'

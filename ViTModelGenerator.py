@@ -152,8 +152,14 @@ class ViTRegression(nn.Module):
 
                     self.optimizer.zero_grad()
                     output = self.forward(imgs)
-                    target = angles.unsqueeze(1).float()
-                    loss = self.criterion(output, target)  # L1 loss for regression applications
+
+                    no_outputs = self.mlp_head._modules['2'].out_features
+                    if no_outputs == 2:
+                        target = torch.cat((angles.unsqueeze(1).float(), vels.unsqueeze(1).float()), 1)
+                        loss = self.criterion(output, target)  # L1 loss for regression applications
+                    else:
+                        target = angles.unsqueeze(1).float()
+                        loss = self.criterion(output, target)  # L1 loss for regression applications
                     loss.backward()
                     self.optimizer.step()
                     running_loss_train.append(loss.item())
