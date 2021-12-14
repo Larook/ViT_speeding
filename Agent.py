@@ -103,6 +103,7 @@ class Agent:
     def update_pose(self, dt):
         """ moves the agent - updates position and observation after the velocities obtained """
         pose, _ = pb.getBasePositionAndOrientation(self.id)
+        # print('pose', pose)
         pb.resetBasePositionAndOrientation(self.id, np.add(pose, [math.sin(self.steering_angle) * self.velocity * dt, 0, 0]),
                                            pb.getQuaternionFromEuler(self.orientation))
         pass

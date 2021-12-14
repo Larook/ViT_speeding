@@ -18,6 +18,7 @@ import pybullet_data
 from SimulationData import SimulationData
 
 
+
 class Environment():
     # when clicking "G" when sim window pops out, the disturbing windows dissapear
     sim_dt: int
@@ -67,12 +68,96 @@ class Environment():
             self.training_data = SimulationData()
         self.spawn_agent()
 
+    def spawn_random_obstacles_cars(self):
+        dir_with_cars = os.path.join(os.getcwd(), 'urdfs/real_cars')
+        for i, file in enumerate(os.listdir(dir_with_cars)):
+            print("file=", file)
+            if file.endswith('.urdf'):
+                # obs_id = pb.loadURDF(os.path.join(dir_with_cars, file), self.get_random_spawn_pose(), self.obst_quat, useFixedBase=1)
+                obs_id = pb.loadURDF(os.path.join(dir_with_cars, file), self.get_random_spawn_pose(), self.obst_quat)
+                pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=get_random_color())
+                self.env_pb_obstacle_ids.append(obs_id)
+
 
     def get_random_spawn_pose(self):
         # make sure that the positions are within ranges for each line
         car_width = 0.7
         lane_xs = [-1.5, -0.5, 0.5, 1.5]
         return np.add(self.horizon_middle_point, [np.random.choice(lane_xs), np.random.uniform(0.4, self.difficulty_distance), 0])
+
+    def spawn_evaluation_obstacle_course(self):
+        """
+        17 cars
+
+        get 17 cars, then move them
+        11 rows
+        """
+        print('eval obst course')
+        dir_with_cars = os.path.join(os.getcwd(), 'urdfs/real_cars')
+        filepaths_with_cars = []
+        rows_max = 11
+        pos_list = []
+
+        # get the cars
+        for i, file in enumerate(os.listdir(dir_with_cars)):
+            print("file=", file)
+            if file.endswith('.urdf'):
+                # obs_id = pb.loadURDF(os.path.join(dir_with_cars, file), self.get_random_spawn_pose(), self.obst_quat, useFixedBase=1)
+                filepaths_with_cars.append(os.path.join(dir_with_cars, file))
+                #
+                # obs_id = pb.loadURDF(os.path.join(dir_with_cars, file), self.get_random_spawn_pose(), self.obst_quat)
+                # pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=get_random_color())
+                # self.env_pb_obstacle_ids.append(obs_id)
+
+        # get the positions of cars
+        lane_xs = [-1.5, -0.5, 0.5, 1.5]
+        dist_per_row = 6
+        for i, row in enumerate(range(rows_max)):
+            if row < 2:  # first 2 rows
+                pos_row_0 = np.add(self.horizon_middle_point, [lane_xs[0], i*dist_per_row, 0])
+                pos_row_3 = np.add(self.horizon_middle_point, [lane_xs[3], i*dist_per_row, 0])
+                pos_list.append([pos_row_0, pos_row_3])
+            if row == 2:
+                pos_row_3 = np.add(self.horizon_middle_point, [lane_xs[3], i*dist_per_row, 0])
+                pos_list.append([pos_row_3])
+            if row == 3:
+                pos_row_2 = np.add(self.horizon_middle_point, [lane_xs[2], i * dist_per_row, 0])
+                pos_list.append([pos_row_2])
+            if row == 4:
+                pos_row_1 = np.add(self.horizon_middle_point, [lane_xs[1], i * dist_per_row, 0])
+                pos_list.append([pos_row_1])
+            if row == 5:
+                pass
+            if row == 6:
+                pos_row_0 = np.add(self.horizon_middle_point, [lane_xs[0], i*dist_per_row, 0])
+                pos_list.append([pos_row_0])
+            if row == 7:
+                pos_row_1 = np.add(self.horizon_middle_point, [lane_xs[1], i * dist_per_row, 0])
+                pos_list.append([pos_row_1])
+            if row == 8:
+                pos_row_2 = np.add(self.horizon_middle_point, [lane_xs[2], i * dist_per_row, 0])
+                pos_list.append([pos_row_2])
+            if row == 9:
+                pass
+            if row == 10:
+                pos_row_0 = np.add(self.horizon_middle_point, [lane_xs[0], i * dist_per_row, 0])
+                pos_row_2 = np.add(self.horizon_middle_point, [lane_xs[2], i * dist_per_row, 0])
+                pos_row_3 = np.add(self.horizon_middle_point, [lane_xs[3], i * dist_per_row, 0])
+                pos_list.append([pos_row_0, pos_row_2, pos_row_3])
+            if row == 11:
+                pos_row_0 = np.add(self.horizon_middle_point, [lane_xs[0], i * dist_per_row, 0])
+                pos_row_1 = np.add(self.horizon_middle_point, [lane_xs[1], i * dist_per_row, 0])
+                pos_row_3 = np.add(self.horizon_middle_point, [lane_xs[3], i * dist_per_row, 0])
+                pos_list.append([pos_row_0, pos_row_1, pos_row_3])
+                pass
+
+        # spawn every obstacle
+        for poses_in_row in pos_list:
+            for pos in poses_in_row:
+                obs_id = pb.loadURDF(np.random.choice(filepaths_with_cars), pos, self.obst_quat)
+                pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=get_random_color(), specularColor=[250, 250, 250])
+
+                self.env_pb_obstacle_ids.append(obs_id)
 
     def spawn_agent(self):
         self.agent = Agent(urdf_path="urdfs/real_cars/bmw_z4.urdf")
@@ -84,21 +169,18 @@ class Environment():
 
         self.agent_id = self.agent.id
 
-    def run(self, keyboard_steering, ai_steering, **kwargs):
+    def run(self, keyboard_steering, ai_steering, eval_run=False, **kwargs):
         """ whole procedure of creating a simulation
         moves objects, resets their position and makes sure that agent saves images"""
 
-        def spawn_random_obstacles_cars():
-            dir_with_cars = os.path.join(os.getcwd(), 'urdfs/real_cars')
-            for i, file in enumerate(os.listdir(dir_with_cars)):
-                print("file=", file)
-                if file.endswith('.urdf'):
-                    # obs_id = pb.loadURDF(os.path.join(dir_with_cars, file), self.get_random_spawn_pose(), self.obst_quat, useFixedBase=1)
-                    obs_id = pb.loadURDF(os.path.join(dir_with_cars, file), self.get_random_spawn_pose(), self.obst_quat)
-                    pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=get_random_color())
-                    self.env_pb_obstacle_ids.append(obs_id)
+        if not eval_run:
+            self.spawn_random_obstacles_cars()
+        else:
+            # do eval run obstacle course
+            self.spawn_evaluation_obstacle_course()
 
-        spawn_random_obstacles_cars()
+            # time.sleep(10)
+            # exit('check')
         # print("kwargs['ai_model']", kwargs['ai_model'])
 
         if keyboard_steering:
@@ -111,10 +193,15 @@ class Environment():
 
     def move_and_get_obstacle_idx_to_reset(self, v_y: float) -> list:
         idx_to_remove = []
-
+        # Todo: change from velocities to update the pose so the object dont fly
         for i in self.env_pb_obstacle_ids:
-            pb.resetBaseVelocity(i, linearVelocity=[0, -v_y, 0], angularVelocity=[0, 0, 0])
+            # pb.resetBaseVelocity(i, linearVelocity=[0, -v_y, 0], angularVelocity=[0, 0, 0])
             pos, rot = pb.getBasePositionAndOrientation(i)
+
+            pos_new = np.add(pos, [0, -v_y*self.sim_dt, 0])
+            pos_new[2] = 0
+            pb.resetBasePositionAndOrientation(i, pos_new, rot)
+            # print('pos_new', pos_new)
             if pos[1] < -1:
                 idx_to_remove.append(i)
         return idx_to_remove
@@ -133,7 +220,9 @@ class Environment():
     def randomize_color(self, obs_id):
         # doesnt work! Dont know why
         for joint in range(10):
-            pb.changeVisualShape(obs_id, joint, rgbaColor=get_random_color(), physicsClientId=0)
+            # pb.changeVisualShape(obs_id, joint, rgbaColor=get_random_color(), physicsClientId=0)
+            pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=get_random_color(), specularColor=[250, 250, 250])
+
         return None
 
     def gather_data(self):

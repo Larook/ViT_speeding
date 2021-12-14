@@ -39,7 +39,7 @@ if __name__ == "__main__":
                       dim=64, depth=1, heads=2, mlp_dim=128)
         config_ViT = dict(model='ViT', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
         model = ViTRegression(wandb_config=config_ViT, **params)
-        model.load_state_dict(torch.load('model_training/trained_models/model_700_ViT.pth'))
+        model.load_state_dict(torch.load('model_training/trained_models/model_700_ViT_data_24th.pth'))
 
     else:
         config_resnet = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
@@ -54,5 +54,6 @@ if __name__ == "__main__":
     environment = Environment(dt=DETLA_T, ai_steering=ai_steering, difficulty_distance=difficulty_distance)
     environment.set_cool_game_vibe_camera_position()
 
-    environment.run(keyboard_steering=False, ai_steering=True, **dict(ai_model=model))
+    # environment.run(eval_run=True, keyboard_steering=False, ai_steering=True, **dict(ai_model=model))
+    environment.run(eval_run=False, keyboard_steering=False, ai_steering=True, **dict(ai_model=model))
     # test_show_obstacles()

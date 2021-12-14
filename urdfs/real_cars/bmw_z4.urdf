@@ -3,7 +3,7 @@
   <link name="box">
 
     <inertial>
-      <mass value="300"/>
+      <mass value="5000"/>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <inertia ixx="0.9" ixy="0.9" ixz="0.9" iyy="0.9" iyz="0.9" izz="0.9"/>
     </inertial>
