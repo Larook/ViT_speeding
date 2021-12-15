@@ -5,7 +5,7 @@ _inspirational_papers/
 #pyCharm
 .idea/
 
-__pycache__/
+**__pycache__/**
 
 # Compiled source #
 ###################

@@ -75,14 +75,13 @@ def model_pipeline(hyperparameters):
 
 def run_regular_wandb_training(model):
 
-
     wandb.login(key=open('wandb/__login_wandb_pwd.txt', 'r').read())
     wandb.init(project="my-test-project", entity="larook")
     # wandb.init(mode="disabled")
 
 
     time_start = time.time()
-    config = dict(model=model, learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
+    config = dict(model=model, learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
     # config = dict(model='resnet', learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
     model_pipeline(hyperparameters=config)
     print('GPU device time taken: ', time.time()-time_start)

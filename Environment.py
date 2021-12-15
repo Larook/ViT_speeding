@@ -284,16 +284,18 @@ class Environment():
             input_tensor = preprocess(Image.fromarray(img))
             input_batch = input_tensor.unsqueeze(0)
 
-            angle = ai_model.forward(input_batch)
-            self.agent.steering_angle = angle
+            output = ai_model.forward(input_batch)
+            angle, velocity_agent = output[:, 0], output[:, 1]
+            self.agent.steering_angle = np.float_(angle)
+            self.agent.velocity = np.float_(velocity_agent)
 
             # move the agent
             self.agent.update_pose(dt=self.sim_dt)
 
-            v_y = self.agent.angle_to_vy()
-            print("steering_angle=%f  v_Y=%f" % (self.agent.steering_angle, v_y))
+            obs_rel_vel_y = self.agent.angle_to_vy()
+            print("steering_angle=%f  v_Y=%f" % (self.agent.steering_angle, obs_rel_vel_y))
             # move all the obstacles and reset their positions when needed
-            idx_to_reset = self.move_and_get_obstacle_idx_to_reset(v_y)
+            idx_to_reset = self.move_and_get_obstacle_idx_to_reset(obs_rel_vel_y)
             self.reset_obstacles(idx_to_reset)
 
             pb.stepSimulation()

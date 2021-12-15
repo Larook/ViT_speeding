@@ -34,16 +34,18 @@ if __name__ == "__main__":
     do_vit = True
     # do_vit = False
 
+    num_outputs = 2
     if do_vit:
-        params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3,
+        params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3,
                       dim=64, depth=1, heads=2, mlp_dim=128)
         config_ViT = dict(model='ViT', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
         model = ViTRegression(wandb_config=config_ViT, **params)
-        model.load_state_dict(torch.load('model_training/trained_models/model_700_ViT_data_24th.pth'))
+        # model.load_state_dict(torch.load('model_training/trained_models/model_700_ViT_data_24th.pth'))
+        model.load_state_dict(torch.load('model_training/trained_models/model_20_ViT.pth'))
 
     else:
         config_resnet = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
-        model = ResnetRegression(wandb_config=config_resnet)
+        model = ResnetRegression(wandb_config=config_resnet, num_outputs=num_outputs)
         model.load_state_dict(torch.load('model_training/trained_models/model_20_resnet.pth'))
 
     model.eval()
