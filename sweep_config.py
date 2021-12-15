@@ -11,7 +11,8 @@ sweep_config = {
                         'resnet'
                     ]},
 
-                    'early_stopping': {'values': [True, False]},
+                    # 'early_stopping': {'values': [True, False]},
+                    'early_stopping': {'value': True},
 
                     'epochs': {'value': 200},
                     # 'epochs': {'value': 2},
