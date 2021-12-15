@@ -152,7 +152,7 @@ class ResnetRegression(nn.Module):
                 eval_loss_now = np.mean(running_loss_test)
                 self.loss_test_history.append(eval_loss_now)
                 """ early stopping mechanism """
-                self.check_early_stopping(eval_loss_now, eval_loss_prev)
+                self.check_early_stopping(eval_loss_now, eval_loss_prev, epoch=epoch)
                 eval_loss_prev = eval_loss_now
 
         self.save_training_model_statistics()
@@ -160,7 +160,7 @@ class ResnetRegression(nn.Module):
         model_save_path = 'model_training/trained_models/model_' + str(self.max_epochs) +'_' + str(self.wandb_config['model']) + '.pth'
         torch.save(self.state_dict(), model_save_path)
 
-    def check_early_stopping(self, eval_loss_now, eval_loss_prev):
+    def check_early_stopping(self, eval_loss_now, eval_loss_prev, epoch):
         if self.wandb_config['early_stopping']:
             if eval_loss_now > eval_loss_prev:
                 self.trigger_times += 1
