@@ -56,6 +56,8 @@ def model_pipeline(hyperparameters):
         wandb.config.batch_size = hyperparameters['batch_size']
         wandb.config.optimizer = hyperparameters['optimizer']
         wandb.config.model = hyperparameters['model']
+        wandb.config.early_stopping = hyperparameters['early_stopping']
+        wandb.config.l2_regularization_weight = hyperparameters['l2_regularization_weight']
 
         num_outputs = 2
         # params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
@@ -81,7 +83,7 @@ def run_regular_wandb_training(model):
 
 
     time_start = time.time()
-    config = dict(model=model, learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+    config = dict(model=model, learning_rate=0.003, epochs=4, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
     # config = dict(model='resnet', learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
     model_pipeline(hyperparameters=config)
     print('GPU device time taken: ', time.time()-time_start)
@@ -120,8 +122,8 @@ if __name__ == "__main__":
     # training_data_dir_path = 'model_training/data/03-11_10:23_training_data/'
     # https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb#scrollTo=r4VjKui20N3j
 
-    run_regular_wandb_training(model='ViT')
-    run_regular_wandb_training(model='resnet')
-    # run_sweeps_wandb_training()
+    # run_regular_wandb_training(model='ViT')
+    # run_regular_wandb_training(model='resnet')
+    run_sweeps_wandb_training()
 
 

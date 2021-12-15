@@ -61,11 +61,15 @@ class ViTRegression(nn.Module):
         self.optimizer = self.build_optimizer(self.wandb_config['optimizer'])
         self.criterion = F.smooth_l1_loss
 
+        """ early stopping """
+        self.trigger_times = 0
+        self.patience = 10
+
     def build_optimizer(self, optimizer):
         if optimizer == "sgd":
-            optimizer = optim.SGD(self.parameters(), lr=self.wandb_config['learning_rate'], momentum=0.9)
+            optimizer = optim.SGD(self.parameters(), lr=self.wandb_config['learning_rate'], momentum=0.9, weight_decay=self.wandb_config['l2_regularization_weight'])
         elif optimizer == "adam":
-            optimizer = optim.Adam(self.parameters(), lr=self.wandb_config['learning_rate'])
+            optimizer = optim.Adam(self.parameters(), lr=self.wandb_config['learning_rate'], weight_decay=self.wandb_config['l2_regularization_weight'])
         return optimizer
 
     def load_dataloaders(self, pickle_df_path):
@@ -133,6 +137,7 @@ class ViTRegression(nn.Module):
 
             example_ct_test = 0  # number of examples seen
             batch_ct_test = 0
+            eval_loss_prev = 0  # early stopping
 
             # total_samples = len(self.train_dataloader.dataset)
             wandb.watch(self, self.criterion, log="all", log_freq=1000)
@@ -160,6 +165,11 @@ class ViTRegression(nn.Module):
                     else:
                         target = angles.unsqueeze(1).float()
                         loss = self.criterion(output, target)  # L1 loss for regression applications
+
+                    # """ introduce regularization """
+                    # if self.wandb_config['l2_regularization_weight']:
+
+
                     loss.backward()
                     self.optimizer.step()
                     running_loss_train.append(loss.item())
@@ -185,13 +195,26 @@ class ViTRegression(nn.Module):
                           step=epoch)
 
                 # wandb.log({"loss": np.mean(running_loss_test), "epoch": epoch})
-                self.loss_test_history.append(np.mean(running_loss_test))
+                eval_loss_now = np.mean(running_loss_test)
+                self.loss_test_history.append(eval_loss_now)
+                """ early stopping mechanism """
+                self.check_early_stopping(eval_loss_now, eval_loss_prev)
+                eval_loss_prev = eval_loss_now
 
         self.save_training_model_statistics()
 
         model_save_path = 'model_training/trained_models/model_' + str(self.max_epochs) +'_' + str(self.wandb_config['model']) + '.pth'
-
         torch.save(self.state_dict(), model_save_path)
+
+    def check_early_stopping(self, eval_loss_now, eval_loss_prev):
+        if self.wandb_config['early_stopping']:
+            if eval_loss_now > eval_loss_prev:
+                self.trigger_times += 1
+                if self.trigger_times >= self.patience + 1:  # +1 because of the first eval loss is small
+                    model_save_path = 'model_training/trained_models/model_' + str(epoch) + '_' + str(
+                        self.wandb_config['model']) + '_' + str(self.max_epochs) + '_early_stopping.pth'
+                    torch.save(self.state_dict(), model_save_path)
+                    print("trying out early stopping")
 
     def save_training_model_statistics(self):
 
