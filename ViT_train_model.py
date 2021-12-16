@@ -25,10 +25,10 @@ from sweep_config import sweep_config
 
 DETLA_T = 0.1
 
-#TODO:
 """
-- improve plots
-    - for each plot add text message with the final training and testing loss
+TODO:
+    - stop training with early_stopping - especially important for sweeps
+    - should we save model for each sweep? Maybe not
 """
 
 
@@ -83,7 +83,7 @@ def run_regular_wandb_training(model):
 
 
     time_start = time.time()
-    config = dict(model=model, learning_rate=0.003, epochs=4, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
+    config = dict(model=model, learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
     # config = dict(model='resnet', learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
     model_pipeline(hyperparameters=config)
     print('GPU device time taken: ', time.time()-time_start)

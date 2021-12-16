@@ -63,7 +63,7 @@ class ViTRegression(nn.Module):
 
         """ early stopping """
         self.trigger_times = 0
-        self.patience = 10
+        self.patience = 4
 
     def build_optimizer(self, optimizer):
         if optimizer == "sgd":
@@ -128,6 +128,7 @@ class ViTRegression(nn.Module):
             config = wandb.config
             print("train_epochs, config", config)
             # pprint(config)
+            no_outputs = self.mlp_head._modules['2'].out_features
 
             self.max_epochs = config['epochs']
             self.loss_train_history = []
@@ -158,7 +159,6 @@ class ViTRegression(nn.Module):
                     self.optimizer.zero_grad()
                     output = self.forward(imgs)
 
-                    no_outputs = self.mlp_head._modules['2'].out_features
                     if no_outputs == 2:
                         target = torch.cat((angles.unsqueeze(1).float(), vels.unsqueeze(1).float()), 1)
                         loss = self.criterion(output, target)  # L1 loss for regression applications
@@ -176,12 +176,12 @@ class ViTRegression(nn.Module):
                 self.loss_train_history.append(np.mean(running_loss_train))
 
                 self.eval()
+                # self.train()  # put to train for checking if the lower eval test is due to the dropout! - seems like dropout is fking nice
                 for j, [imgs, angles, vels] in enumerate(self.test_dataloader):
                     imgs, angles, vels = imgs.to(self.device), angles.to(self.device), vels.to(self.device)
                     self.optimizer.zero_grad()
                     output = self.forward(imgs)
 
-                    no_outputs = self.mlp_head._modules['2'].out_features
                     if no_outputs == 2:
                         target = torch.cat((angles.unsqueeze(1).float(), vels.unsqueeze(1).float()), 1)
                         loss = self.criterion(output, target)  # L1 loss for regression applications
@@ -201,8 +201,11 @@ class ViTRegression(nn.Module):
                 eval_loss_now = np.mean(running_loss_test)
                 self.loss_test_history.append(eval_loss_now)
                 """ early stopping mechanism """
-                self.check_early_stopping(eval_loss_now, eval_loss_prev, epoch=epoch)
+                stop_early = self.check_early_stopping(eval_loss_now, eval_loss_prev, epoch=epoch)
                 eval_loss_prev = eval_loss_now
+                if stop_early:
+                    print('should stop trainng more epochs now')
+                    break
 
         self.save_training_model_statistics()
 
@@ -213,11 +216,16 @@ class ViTRegression(nn.Module):
         if self.wandb_config['early_stopping']:
             if eval_loss_now > eval_loss_prev:
                 self.trigger_times += 1
+                print('self.trigger_times', self.trigger_times, '\teval_loss_now > eval_loss_prev', eval_loss_now > eval_loss_prev)
                 if self.trigger_times >= self.patience + 1:  # +1 because of the first eval loss is small
                     model_save_path = 'model_training/trained_models/model_' + str(epoch) + '_' + str(
                         self.wandb_config['model']) + '_' + str(self.max_epochs) + '_early_stopping.pth'
                     torch.save(self.state_dict(), model_save_path)
-                    print("trying out early stopping")
+                    return True
+            else:
+                self.trigger_times = 0
+                print('self.trigger_times', self.trigger_times, '\teval_loss_now > eval_loss_prev', eval_loss_now > eval_loss_prev)
+        return False
 
     def save_training_model_statistics(self):
 

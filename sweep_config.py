@@ -13,6 +13,7 @@ sweep_config = {
 
                     # 'early_stopping': {'values': [True, False]},
                     'early_stopping': {'value': True},
+                    # 'early_stopping': {'value': False},
 
                     'epochs': {'value': 200},
                     # 'epochs': {'value': 2},

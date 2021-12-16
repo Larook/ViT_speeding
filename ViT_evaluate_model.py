@@ -38,15 +38,28 @@ if __name__ == "__main__":
     if do_vit:
         params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3,
                       dim=64, depth=1, heads=2, mlp_dim=128)
-        config_ViT = dict(model='ViT', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+        # config_ViT = dict(model='ViT', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+        # config_ViT = {'batch_size': 10, 'dropout': 0.3, 'early_stopping': False, 'epochs': 200, 'l2_regularization_weight': 0, 'learning_rate': 0.0322595974979814, 'model': 'ViT', 'optimizer': 'sgd'}
+        # config_ViT = dict(model='ViT', learning_rate=0.003, epochs=40, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
+        config_ViT = dict(model='ViT', learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
+
         model = ViTRegression(wandb_config=config_ViT, **params)
         # model.load_state_dict(torch.load('model_training/trained_models/model_700_ViT_data_24th.pth'))
-        model.load_state_dict(torch.load('model_training/trained_models/model_1000_ViT.pth'))
+        # model.load_state_dict(torch.load('model_training/trained_models/model_1000_ViT.pth'))
+        model.load_state_dict(torch.load('model_training/trained_models/model_56_ViT_1000_early_stopping.pth'))
+        # model.load_state_dict(torch.load('model_training/trained_models/model_200_ViT.pth'))
+        # model.load_state_dict(torch.load('model_training/trained_models/model_40_ViT.pth'))
 
     else:
-        config_resnet = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+        # config_resnet = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
+        # model = ResnetRegression(wandb_config=config_resnet, num_outputs=num_outputs)
+        # model.load_state_dict(torch.load('model_training/trained_models/model_20_resnet.pth'))
+
+        config_resnet = {'batch_size': 10, 'dropout': 0.4, 'early_stopping': False, 'epochs': 200, 'l2_regularization_weight': 0.3,
+         'learning_rate': 0.07573456017600638, 'model': 'resnet', 'optimizer': 'sgd'}
         model = ResnetRegression(wandb_config=config_resnet, num_outputs=num_outputs)
-        model.load_state_dict(torch.load('model_training/trained_models/model_20_resnet.pth'))
+        model.load_state_dict(torch.load('model_training/trained_models/model_200_resnet.pth'))
+
 
     model.eval()
 
