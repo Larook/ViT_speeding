@@ -63,7 +63,7 @@ class ViTRegression(nn.Module):
 
         """ early stopping """
         self.trigger_times = 0
-        self.patience = 4
+        self.patience = 3
 
     def build_optimizer(self, optimizer):
         if optimizer == "sgd":
