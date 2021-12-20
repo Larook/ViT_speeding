@@ -290,9 +290,12 @@ class Environment():
             input_batch = input_tensor.unsqueeze(0)
 
             output = ai_model.forward(input_batch)
-            angle, velocity_agent = output[:, 0], output[:, 1]
-            self.agent.steering_angle = np.float_(angle)
-            self.agent.velocity = np.float_(velocity_agent)
+            if ai_model.no_outputs == 2:
+                angle, velocity_agent = output[:, 0], output[:, 1]
+                self.agent.steering_angle = np.float_(angle)
+                self.agent.velocity = np.float_(velocity_agent)
+            else:
+                self.agent.steering_angle = np.float_(output)
 
             # move the agent
             self.agent.update_pose(dt=self.sim_dt)

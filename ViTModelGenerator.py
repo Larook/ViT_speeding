@@ -61,6 +61,8 @@ class ViTRegression(nn.Module):
         self.optimizer = self.build_optimizer(self.wandb_config['optimizer'])
         self.criterion = F.smooth_l1_loss
 
+        self.no_outputs = self.mlp_head._modules['2'].out_features
+
         """ early stopping """
         self.trigger_times = 0
         self.patience = 3
@@ -112,18 +114,108 @@ class ViTRegression(nn.Module):
         # print('x', x)
         return self.mlp_head(x)
 
-    # def load_simulation_data(self, main_df, shuffle=True):
-    #     # row = dict(time=time.time()-self.start_time, steering_angle=angle, velocity_y=v_y, image=img)
-    #     main_df = main_df.sample(frac=1)
-    #
-    #     # inputs are just images or maybe images + time
-    #     # outputs should be steering angle + velocity
-    #
-    #     self.inputs = torch.tensor(main_df['image'].values)
-    #     self.outputs = torch.tensor(main_df['steering_angle'].values)
-    #     pass
+    def calculate_loss(self, output, target_angles, target_vels):
+        if self.no_outputs == 2:
+            target = torch.cat((target_angles.unsqueeze(1).float(), target_vels.unsqueeze(1).float()), 1)
+            loss = self.criterion(output, target)  # L1 loss for regression applications
+        else:
+            target = target_angles.unsqueeze(1).float()
+            loss = self.criterion(output, target)  # L1 loss for regression applications
+        return loss
 
-    def train_epochs(self):
+    def better_training_pipeline(self):
+        # https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/How_does_adding_dropout_affect_model_performance%3F.ipynb#scrollTo=Z3Cv0XLX54Xo
+        with wandb.init(config=self.wandb_config):
+            config = wandb.config
+            print("train_epochs, config", config)
+            # pprint(config)
+            wandb.watch(self, self.criterion, log="all", log_freq=1000)
+
+            test_epoch_avg_loss_prev = 0
+
+            # Loop over epochs
+            for epoch in tqdm(range(config['epochs'])):
+                train_epoch_avg_loss_now = self.train_epoch_return_avg_loss()
+                test_epoch_avg_loss_now = self.test_epoch_return_avg_loss()
+
+                """ early stopping mechanism """
+                stop_early = self.check_early_stopping(test_epoch_avg_loss_now, test_epoch_avg_loss_prev, epoch=epoch)
+                if stop_early:
+                    print('should stop trainng more epochs now')
+                    break
+                """ learning rate update """
+                self.decrease_learning_rate(train_epoch_avg_loss_now, test_epoch_avg_loss_prev)
+
+                """ log values """
+                wandb.log({"epoch": epoch, "avg_loss_train": train_epoch_avg_loss_now,
+                           "avg_loss_test": test_epoch_avg_loss_now,
+                           # "example": [wandb.Image(img) for img in imgs],
+                           "learning_rate": self.optimizer.defaults['lr']},
+                          step=epoch)
+                test_epoch_avg_loss_prev = train_epoch_avg_loss_now
+
+            """ model training statistics """
+            self.save_training_model_statistics()
+
+            model_save_path = 'model_training/trained_models/model_' + str(self.max_epochs) + '_' + str(
+                self.wandb_config['model']) + '.pth'
+            torch.save(self.state_dict(), model_save_path)
+
+
+    def test_epoch_return_avg_loss(self):
+        # from https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/How_does_adding_dropout_affect_model_performance%3F.ipynb#scrollTo=Z3Cv0XLX54Xo
+        # Switch model to evaluation mode. This is necessary for layers like dropout, batchnorm etc which behave differently in training and evaluation mode
+        self.eval()
+        running_loss_test = []
+
+        with torch.no_grad():
+            for batch_idx, [imgs, angles, vels] in enumerate(self.train_dataloader, start=0):
+
+                # Load the input features and labels from the test dataset
+                imgs, target_angles, target_vels = imgs.to(self.device), angles.to(self.device), vels.to(self.device)
+
+                # Make predictions: Pass image data from test dataset, make predictions about class image belongs to (0-9 in this case)
+                output = self.forward(imgs)
+
+                # Compute the loss sum up batch loss
+                loss = self.calculate_loss(output, target_angles, target_vels)
+                running_loss_test.append(loss.item())
+        return np.mean(running_loss_test)
+
+    def train_epoch_return_avg_loss(self):
+        # from https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/How_does_adding_dropout_affect_model_performance%3F.ipynb#scrollTo=Z3Cv0XLX54Xo
+        # Switch model to training mode. This is necessary for layers like dropout, batchnorm etc which behave differently in training and evaluation mode
+        running_loss_train = []
+        self.train()
+
+        # We loop over the data iterator, and feed the inputs to the network and adjust the weights.
+        for batch_idx, [imgs, angles, vels] in enumerate(self.train_dataloader, start=0):
+            # Load the input features and targets from the training dataset
+            imgs, target_angles, target_vels = imgs.to(self.device), angles.to(self.device), vels.to(self.device)
+
+            # Reset the gradients to 0 for all learnable weight parameters
+            self.optimizer.zero_grad()
+
+            # Forward pass: Pass image data from training dataset, make predictions about class image belongs to (0-9 in this case)
+            output = self.forward(imgs)
+
+            # Define our loss function, and compute the loss
+            loss = self.calculate_loss(output, target_angles, target_vels)
+
+            # Reset the gradients to 0 for all learnable weight parameters
+            self.optimizer.zero_grad()
+
+            # Backward pass: compute the gradients of the loss w.r.t. the model"s parameters
+            loss.backward()
+            running_loss_train.append(loss.item())
+
+            # Update the neural network weights
+            self.optimizer.step()
+
+        return np.mean(running_loss_train)
+
+
+    def training_pipeline(self):
         with wandb.init(config=self.wandb_config):
             config = wandb.config
             print("train_epochs, config", config)
@@ -166,6 +258,7 @@ class ViTRegression(nn.Module):
                         target = angles.unsqueeze(1).float()
                         loss = self.criterion(output, target)  # L1 loss for regression applications
 
+                    self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
                     running_loss_train.append(loss.item())
@@ -176,36 +269,42 @@ class ViTRegression(nn.Module):
                 self.loss_train_history.append(np.mean(running_loss_train))
 
                 self.eval()
-                # self.train()  # put to train for checking if the lower eval test is due to the dropout! - seems like dropout is fking nice
-                for j, [imgs, angles, vels] in enumerate(self.test_dataloader):
-                    imgs, angles, vels = imgs.to(self.device), angles.to(self.device), vels.to(self.device)
-                    self.optimizer.zero_grad()
-                    output = self.forward(imgs)
+                with torch.no_grad():
+                    # self.train()  # put to train for checking if the lower eval test is due to the dropout! - seems like dropout is fking nice
+                    for j, [imgs, angles, vels] in enumerate(self.test_dataloader):
+                        imgs, angles, vels = imgs.to(self.device), angles.to(self.device), vels.to(self.device)
+                        self.optimizer.zero_grad()
+                        output = self.forward(imgs)
 
-                    if no_outputs == 2:
-                        target = torch.cat((angles.unsqueeze(1).float(), vels.unsqueeze(1).float()), 1)
-                        loss = self.criterion(output, target)  # L1 loss for regression applications
-                    else:
-                        target = angles.unsqueeze(1).float()
-                        loss = self.criterion(output, target)  # L1 loss for regression applications
+                        if no_outputs == 2:
+                            target = torch.cat((angles.unsqueeze(1).float(), vels.unsqueeze(1).float()), 1)
+                            loss = self.criterion(output, target)  # L1 loss for regression applications
+                        else:
+                            target = angles.unsqueeze(1).float()
+                            loss = self.criterion(output, target)  # L1 loss for regression applications
 
-                    running_loss_test.append(loss.item())
-                    example_ct_test += len(imgs)
-                    batch_ct_test += 1
-                wandb.log({"epoch": epoch, "avg_loss_train": np.mean(running_loss_train),
-                           "avg_loss_test": np.mean(running_loss_test),
-                           "example":  [wandb.Image(img) for img in imgs]},
-                          step=epoch)
+                        running_loss_test.append(loss.item())
+                        example_ct_test += len(imgs)
+                        batch_ct_test += 1
+                    # wandb.log({"loss": np.mean(running_loss_test), "epoch": epoch})
+                    eval_loss_now = np.mean(running_loss_test)
+                    self.loss_test_history.append(eval_loss_now)
 
-                # wandb.log({"loss": np.mean(running_loss_test), "epoch": epoch})
-                eval_loss_now = np.mean(running_loss_test)
-                self.loss_test_history.append(eval_loss_now)
                 """ early stopping mechanism """
                 stop_early = self.check_early_stopping(eval_loss_now, eval_loss_prev, epoch=epoch)
                 eval_loss_prev = eval_loss_now
                 if stop_early:
                     print('should stop trainng more epochs now')
                     break
+                """ learning rate update """
+                self.decrease_learning_rate(eval_loss_now, eval_loss_prev)
+
+                """ log values """
+                wandb.log({"epoch": epoch, "avg_loss_train": np.mean(running_loss_train),
+                           "avg_loss_test": np.mean(running_loss_test),
+                           "example": [wandb.Image(img) for img in imgs],
+                           "learning_rate": self.optimizer.defaults['lr']},
+                          step=epoch)
 
         self.save_training_model_statistics()
 
@@ -224,8 +323,18 @@ class ViTRegression(nn.Module):
                     return True
             else:
                 self.trigger_times = 0
-                print('self.trigger_times', self.trigger_times, '\teval_loss_now > eval_loss_prev', eval_loss_now > eval_loss_prev)
+                # print('self.trigger_times', self.trigger_times, '\teval_loss_now > eval_loss_prev', eval_loss_now > eval_loss_prev)
         return False
+
+    def decrease_learning_rate(self, eval_loss_now, eval_loss_prev):
+        if eval_loss_now < eval_loss_prev:
+            loss_delta = eval_loss_now - eval_loss_prev
+            if loss_delta < 0:
+                impr_perc = np.abs(loss_delta)/eval_loss_prev
+                # if 0.999*eval_loss_now > eval_loss_prev:
+                # decrease lr by 0.1%
+                learning_rate_prev = self.optimizer.defaults['lr']
+                self.optimizer.defaults['lr'] = (1-impr_perc/10) * learning_rate_prev
 
     def save_training_model_statistics(self):
 

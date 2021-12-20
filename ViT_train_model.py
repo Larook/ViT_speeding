@@ -60,7 +60,8 @@ def model_pipeline(hyperparameters):
         wandb.config.l2_regularization_weight = hyperparameters['l2_regularization_weight']
         # wandb.config.dropout = hyperparameters['dropout']
 
-        num_outputs = 2
+        # num_outputs = 2  # 2 turned out to be very unreliable
+        num_outputs = 1
         # params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
         params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
 
@@ -70,7 +71,7 @@ def model_pipeline(hyperparameters):
             model = ResnetRegression(wandb_config=hyperparameters, num_outputs=num_outputs)
         model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
-        model.train_epochs()
+        model.training_pipeline()
         model.plot_training_history()
     # model.to_onnx()
     # wandb.save("model.onnx")
@@ -101,9 +102,16 @@ def run_sweeps_wandb_training():
             print("hello from train")
             pprint.pprint(config)
 
-            # params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
-            params = dict(image_size=256, patch_size=8, num_outputs=2, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
+
+            """ the best results for only 1 output - angle """
+            num_outputs = 1
+            params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
+            # params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
             model = ViTRegression(wandb_config=config, **params)
+            if wandb.config.model == 'ViT':
+                model = ViTRegression(wandb_config=config, **params)
+            elif wandb.config.model == 'resnet':
+                model = ResnetRegression(wandb_config=config, num_outputs=num_outputs)
 
             # training_pickle_df_path = 'model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'
             # training_pickle_df_path = 'model_training/data/whole_15-11_day_training_data.pkl'
@@ -111,7 +119,9 @@ def run_sweeps_wandb_training():
             training_pickle_df_path = 'model_training/data/whole_25-11_day_training_data.pkl'
             model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
-            model.train_epochs()
+            model.better_training_pipeline()
+            # model.training_pipeline()
+
 
     # check if sweep config is correctly loaded
     pprint.pprint(sweep_config)
@@ -127,8 +137,8 @@ if __name__ == "__main__":
     # training_data_dir_path = 'model_training/data/03-11_10:23_training_data/'
     # https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb#scrollTo=r4VjKui20N3j
 
-    run_regular_wandb_training(model='ViT')
+    # run_regular_wandb_training(model='ViT')
     # run_regular_wandb_training(model='resnet')
-    # run_sweeps_wandb_training()
+    run_sweeps_wandb_training()
 
 

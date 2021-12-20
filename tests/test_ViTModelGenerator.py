@@ -63,7 +63,7 @@ class TestViTRegression(TestCase):
     def test_train_epoch(self):
         model = ViTRegression(**self.params)
         model.load_dataloaders(dir_path=self.dir_path)
-        model.train_epochs(max_epochs=50, save_path='test_model.pth')
+        model.training_pipeline(max_epochs=50, save_path='test_model.pth')
         model.plot_training_history()
         pass
 

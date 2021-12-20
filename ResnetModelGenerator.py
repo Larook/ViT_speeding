@@ -156,6 +156,9 @@ class ResnetRegression(nn.Module):
                 if stop_early:
                     print('should stop trainng more epochs now')
                     break
+                """ learning rate update """
+                self.decrease_learning_rate()
+
 
         self.save_training_model_statistics()
 
