@@ -7,8 +7,8 @@ sweep_config = {
 
     'parameters': {
                     # 'model': {'values': ['ViT', 'resnet']},
-                    'model': {'value': 'ViT'},
-                    # 'model': {'value': 'resnet'},
+                    # 'model': {'value': 'ViT'},
+                    'model': {'value': 'resnet'},
 
                     # 'early_stopping': {'values': [True, False]},
                     'early_stopping': {'value': True},

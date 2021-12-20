@@ -206,6 +206,27 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/model_training/evaluation/eval_3_vit_model.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/model_training/evaluation/eval_3vit_model.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/model_training/evaluation/eval_vit_model.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/model_training/main.py">
           <value>
             <Attribute>

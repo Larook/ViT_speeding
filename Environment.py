@@ -2,6 +2,7 @@ import os
 import random
 import time
 
+import pandas as pd
 import torch
 from PIL import Image
 from einops import rearrange
@@ -30,12 +31,16 @@ class Environment():
 
     dist_per_step = 0.0005
 
-    def __init__(self, dt, ai_steering, difficulty_distance):
+    def __init__(self, dt, ai_steering, difficulty_distance, connect_gui=True):
 
+        self.runtime = 0  # runtime that is checked as the evaluation
         self.difficulty_distance = difficulty_distance
 
         if not pb.isConnected():
-            physicsClient = pb.connect(pb.GUI)
+            if connect_gui:
+                physicsClient = pb.connect(pb.GUI)
+            else:
+                physicsClient = pb.connect(pb.DIRECT)
         # physicsClient = pb.connect(pb.UDP, "192.168.0.10")
         # physicsClient = pb.connect(pb.TCP, "localhost", 6667)
         while not pb.isConnected():
@@ -299,7 +304,11 @@ class Environment():
             self.reset_obstacles(idx_to_reset)
 
             pb.stepSimulation()
-        pass
+            self.runtime += self.sim_dt
+
+        if not can_proceed:
+            return False
+        return True
 
     def popup_window_ask_if_save(self):
         answer = sg.popup_yes_no('Do you want to save this approach?')
@@ -321,6 +330,32 @@ class Environment():
 
         agent_pose, _ = pb.getBasePositionAndOrientation(self.agent_id)
         pb.resetDebugVisualizerCamera(cam_dist, 0, -20, np.add(agent_pose, [0, 2.8, -0.4]))
+
+    def evaluate_many_tries(self, repeat_times, model):
+        """
+        run the whole procedure of running the model without GUI many times
+        in each run save the time of last frames so we can compare the succesful runtime
+        after each run zero the runtime
+        """
+        model.eval()
+
+        if model.wandb_config['model'] == 'ViT':
+            csv_filename = 'eval_' + str(repeat_times) + '_vit_model.csv'
+        else:
+            csv_filename = 'eval_' + str(repeat_times) + '_resnet_model.csv'
+
+        eval_times = []
+        for i in range(repeat_times):
+            self.spawn_evaluation_obstacle_course()
+            self.runtime = 0  # zero the runtime
+            self.evaluate_ai(model)
+            eval_times.append(self.runtime)
+            self.runtime = 0  # zero the runtime
+
+        df = pd.DataFrame(eval_times)
+        df.columns = ['runtime[s]']
+        df.to_csv(os.path.join('model_training/evaluation', csv_filename))
+
 
 def get_random_color():
     """ example [0, 0.3, 1, 1] """
