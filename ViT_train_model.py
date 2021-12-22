@@ -105,8 +105,8 @@ def run_sweeps_wandb_training():
 
             """ the best results for only 1 output - angle """
             num_outputs = 1
-            params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
-            # params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
+            # params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)  # original parameters
+            params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=2, heads=4, mlp_dim=64)
             model = ViTRegression(wandb_config=config, **params)
             if wandb.config.model == 'ViT':
                 model = ViTRegression(wandb_config=config, **params)

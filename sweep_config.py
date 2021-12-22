@@ -1,9 +1,10 @@
 import math
 
 sweep_config = {
-    'method': 'random',
+    # 'method': 'random',
+    'method': 'grid',
 
-    'metric': {'name': 'loss', 'goal': 'minimize'},
+    'metric': {'name': 'avg_loss_test', 'goal': 'minimize'},
 
     'parameters': {
                     # 'model': {'values': ['ViT', 'resnet']},
@@ -17,18 +18,23 @@ sweep_config = {
                     'epochs': {'value': 60},
                     # 'epochs': {'value': 2},
 
-                    'optimizer': {'values': ['adam', 'sgd']},
+                    # 'optimizer': {'values': ['adam', 'sgd']},
+                    'optimizer': {'value': 'adam'},
+
                     # 'fc_layer_size': {'values': [128, 256, 512]},
                     # 'dropout': {'values': [0, 0.1, 0.3]},
                     'dropout': {'value': 0},
                     'l2_regularization_weight': {'values': [0, 0.3, 0.08, 0.15]},
 
-                    'learning_rate': {
-                            # a flat distribution between 0 and 0.1
-                            'distribution': 'uniform',
-                            'min': 0.0001,
-                            'max': 0.002
-                          },
+                    'learning_rate': {'values': [0.001, 0.01, 0.03, 0.1]},
+
+                    # 'learning_rate': {
+                    #         # a flat distribution between 0 and 0.1
+                    #         'distribution': 'uniform',
+                    #         'min': 0.0001,
+                    #         'max': 0.002
+                    #       },
+
                         'batch_size': {
                             'value': 10
                             # integers between 32 and 256

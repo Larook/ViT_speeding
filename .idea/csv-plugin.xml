@@ -234,6 +234,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/model_training/vit_pytorch.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/simulation_generate_data.py">
           <value>
             <Attribute>

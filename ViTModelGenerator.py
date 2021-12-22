@@ -144,7 +144,7 @@ class ViTRegression(nn.Module):
                     print('should stop trainng more epochs now')
                     break
                 """ learning rate update """
-                self.decrease_learning_rate(train_epoch_avg_loss_now, test_epoch_avg_loss_prev)
+                # self.decrease_learning_rate(train_epoch_avg_loss_now, test_epoch_avg_loss_prev)
 
                 """ log values """
                 wandb.log({"epoch": epoch, "avg_loss_train": train_epoch_avg_loss_now,
@@ -315,7 +315,7 @@ class ViTRegression(nn.Module):
         if self.wandb_config['early_stopping']:
             if eval_loss_now > eval_loss_prev:
                 self.trigger_times += 1
-                print('self.trigger_times', self.trigger_times, '\teval_loss_now > eval_loss_prev', eval_loss_now > eval_loss_prev)
+                # print('self.trigger_times', self.trigger_times, '\teval_loss_now > eval_loss_prev', eval_loss_now > eval_loss_prev)
                 if self.trigger_times >= self.patience + 1:  # +1 because of the first eval loss is small
                     model_save_path = 'model_training/trained_models/model_' + str(epoch) + '_' + str(
                         self.wandb_config['model']) + '_' + str(self.max_epochs) + '_early_stopping.pth'
