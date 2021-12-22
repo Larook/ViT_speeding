@@ -131,10 +131,13 @@ class ViTRegression(nn.Module):
             # pprint(config)
             wandb.watch(self, self.criterion, log="all", log_freq=1000)
 
-            test_epoch_avg_loss_prev = 0
+            self.max_epochs = config['epochs']
+            self.loss_train_history = []
+            self.loss_test_history = []
 
+            test_epoch_avg_loss_prev = 0
             # Loop over epochs
-            for epoch in tqdm(range(config['epochs'])):
+            for epoch in tqdm(range(self.max_epochs)):
                 train_epoch_avg_loss_now = self.train_epoch_return_avg_loss()
                 test_epoch_avg_loss_now = self.test_epoch_return_avg_loss()
 

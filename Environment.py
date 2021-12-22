@@ -98,6 +98,9 @@ class Environment():
         11 rows
         """
         print('eval obst course')
+        dist_per_row = 6
+        # dist_per_row = 4  # only for showing an img
+
         dir_with_cars = os.path.join(os.getcwd(), 'urdfs/real_cars')
         filepaths_with_cars = []
         rows_max = 11
@@ -116,7 +119,6 @@ class Environment():
 
         # get the positions of cars
         lane_xs = [-1.5, -0.5, 0.5, 1.5]
-        dist_per_row = 6
         for i, row in enumerate(range(rows_max)):
             if row < 2:  # first 2 rows
                 pos_row_0 = np.add(self.horizon_middle_point, [lane_xs[0], i*dist_per_row, 0])
@@ -351,6 +353,7 @@ class Environment():
         for i in range(repeat_times):
             self.spawn_evaluation_obstacle_course()
             self.runtime = 0  # zero the runtime
+            # time.sleep(10)  # only for showing an img
             self.evaluate_ai(model)
             eval_times.append(self.runtime)
             self.runtime = 0  # zero the runtime
