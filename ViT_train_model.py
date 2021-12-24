@@ -43,11 +43,14 @@ def model_pipeline(hyperparameters):
     # training_pickle_df_path = 'model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'
     # training_pickle_df_path = 'model_training/data/whole_15-11_day_training_data.pkl'
     # training_pickle_df_path = 'model_training/data/whole_24-11_day_training_data.pkl'
-    training_pickle_df_path = 'model_training/data/whole_25-11_day_training_data.pkl'
+
+    # training_pickle_df_path = 'model_training/data/whole_25-11_day_training_data_dataset_1.pkl'  # used for long time
+    # training_pickle_df_path = 'model_training/data/whole_22-12day_training_data_dataset_3.pkl'  # white cars 976 imgs
+    training_pickle_df_path = 'model_training/data/whole_SmallWhite_22-12day_training_data_dataset_2.pkl'  # white cars 67 imgs
 
     # tell wandb to get started
     # with wandb.init(project="pytorch-demo_vit", config=hyperparameters):
-    with wandb.init(project="pytorch-demo_vit"):
+    with wandb.init(project="pytorch-speeding_vit"):
         # access all HPs through wandb.config, so logging matches execution!
         # config = dict(learning_rate=0.003, epochs=5, batch_size=10, optimizer='adam')
 
@@ -63,7 +66,8 @@ def model_pipeline(hyperparameters):
         # num_outputs = 2  # 2 turned out to be very unreliable
         num_outputs = 1
         # params = dict(image_size=256, patch_size=8, num_outputs=1, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
-        params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)
+        # params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)  # original params
+        params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=64)
 
         if wandb.config.model == 'ViT':
             model = ViTRegression(wandb_config=hyperparameters, **params)
@@ -71,8 +75,9 @@ def model_pipeline(hyperparameters):
             model = ResnetRegression(wandb_config=hyperparameters, num_outputs=num_outputs)
         model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
-        model.training_pipeline()
-        model.plot_training_history()
+        # model.training_pipeline()
+        model.better_training_pipeline()
+        # model.plot_training_history()
     # model.to_onnx()
     # wandb.save("model.onnx")
 
@@ -87,8 +92,13 @@ def run_regular_wandb_training(model):
     time_start = time.time()
     configs = []
 
-    config = dict(model=model, learning_rate=0.05881, epochs=1000, batch_size=10, optimizer='adam', early_stopping=False, l2_regularization_weight=0.1)
+    # config = dict(model=model, learning_rate=0.05881, epochs=1000, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
     # config = dict(model=model, learning_rate=0.05881, epochs=1000, batch_size=10, optimizer='adam', early_stopping=False, l2_regularization_weight=0.1)
+    # config = dict(model=model, learning_rate=0.07, epochs=300, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
+    # config = dict(model=model, learning_rate=0.04, epochs=700, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.15)
+    # config = dict(model=model, learning_rate=0.04, epochs=700, batch_size=10, optimizer='adam', early_stopping=False, l2_regularization_weight=0.15)
+
+    config = dict(model=model, learning_rate=0.06, epochs=100, batch_size=10, optimizer='adam', early_stopping=False, l2_regularization_weight=0.05)
 
     # config = dict(model='resnet', learning_rate=0.003, epochs=1000, batch_size=10, optimizer='adam')
     model_pipeline(hyperparameters=config)
@@ -107,7 +117,7 @@ def run_sweeps_wandb_training():
             num_outputs = 1
             # params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)  # original parameters
             params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=2, heads=4, mlp_dim=64)
-            model = ViTRegression(wandb_config=config, **params)
+            # model = ViTRegression(wandb_config=config, **params)
             if wandb.config.model == 'ViT':
                 model = ViTRegression(wandb_config=config, **params)
             elif wandb.config.model == 'resnet':
@@ -116,7 +126,8 @@ def run_sweeps_wandb_training():
             # training_pickle_df_path = 'model_training/data/03-11_all_training_data/whole_03-11_day_training_data.pkl'
             # training_pickle_df_path = 'model_training/data/whole_15-11_day_training_data.pkl'
             # training_pickle_df_path = 'model_training/data/whole_24-11_day_training_data.pkl'
-            training_pickle_df_path = 'model_training/data/whole_25-11_day_training_data.pkl'
+            # training_pickle_df_path = 'model_training/data/whole_25-11_day_training_data.pkl'
+            training_pickle_df_path = 'model_training/data/whole_22-12day_training_data.pkl'
             model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
             model.better_training_pipeline()
@@ -137,8 +148,8 @@ if __name__ == "__main__":
     # training_data_dir_path = 'model_training/data/03-11_10:23_training_data/'
     # https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb#scrollTo=r4VjKui20N3j
 
-    # run_regular_wandb_training(model='ViT')
+    run_regular_wandb_training(model='ViT')
     # run_regular_wandb_training(model='resnet')
-    run_sweeps_wandb_training()
+    # run_sweeps_wandb_training()
 
 

@@ -34,6 +34,8 @@ class Environment():
     def __init__(self, dt, ai_steering, difficulty_distance, connect_gui=True):
 
         self.runtime = 0  # runtime that is checked as the evaluation
+        self.steering_angles = []  # runtime that is checked as the evaluation
+        self.velocities = []  # runtime that is checked as the evaluation
         self.difficulty_distance = difficulty_distance
 
         if not pb.isConnected():
@@ -81,6 +83,8 @@ class Environment():
                 # obs_id = pb.loadURDF(os.path.join(dir_with_cars, file), self.get_random_spawn_pose(), self.obst_quat, useFixedBase=1)
                 obs_id = pb.loadURDF(os.path.join(dir_with_cars, file), self.get_random_spawn_pose(), self.obst_quat)
                 pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=get_random_color())
+                # pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=[0.1, 0.1, 0.15, 1], specularColor=[250, 250, 250])  # black
+
                 self.env_pb_obstacle_ids.append(obs_id)
 
 
@@ -98,6 +102,10 @@ class Environment():
         11 rows
         """
         print('eval obst course')
+        # dist_per_row = 6
+        dist_per_row = 8
+        # dist_per_row = 4  # only for showing an img
+
         dir_with_cars = os.path.join(os.getcwd(), 'urdfs/real_cars')
         filepaths_with_cars = []
         rows_max = 11
@@ -116,7 +124,6 @@ class Environment():
 
         # get the positions of cars
         lane_xs = [-1.5, -0.5, 0.5, 1.5]
-        dist_per_row = 6
         for i, row in enumerate(range(rows_max)):
             if row < 2:  # first 2 rows
                 pos_row_0 = np.add(self.horizon_middle_point, [lane_xs[0], i*dist_per_row, 0])
@@ -160,7 +167,12 @@ class Environment():
         for poses_in_row in pos_list:
             for pos in poses_in_row:
                 obs_id = pb.loadURDF(np.random.choice(filepaths_with_cars), pos, self.obst_quat)
-                pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=get_random_color(), specularColor=[250, 250, 250])
+                # pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=get_random_color(), specularColor=[250, 250, 250])
+
+                # try only 1 color of the car
+                # pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=[0.1, 0.1, 0.6, 1], specularColor=[250, 250, 250])  # blue
+                # pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=[0.1, 0.1, 0.15, 1], specularColor=[250, 250, 250])  # black
+                pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=[0.9, 0.9, 0.9, 1], specularColor=[250, 250, 250])  # white
 
                 self.env_pb_obstacle_ids.append(obs_id)
 
@@ -274,6 +286,9 @@ class Environment():
 
     def evaluate_ai(self, ai_model):
         print("*********************** evaluate_ai ***********************")
+        steering_angles = []
+        velocities = []
+
         preprocess = transforms.Compose([transforms.Resize((256, 256)),
                                                transforms.ToTensor()
                                                ])
@@ -300,6 +315,11 @@ class Environment():
             # move the agent
             self.agent.update_pose(dt=self.sim_dt)
 
+            # save the steering_angles and velocities
+            steering_angles.append(self.agent.steering_angle)
+            velocities.append(self.agent.velocity)
+
+
             obs_rel_vel_y = self.agent.angle_to_vy()
             print("steering_angle=%f  v_Y=%f" % (self.agent.steering_angle, obs_rel_vel_y))
             # move all the obstacles and reset their positions when needed
@@ -308,10 +328,7 @@ class Environment():
 
             pb.stepSimulation()
             self.runtime += self.sim_dt
-
-        if not can_proceed:
-            return False
-        return True
+        return steering_angles, velocities
 
     def popup_window_ask_if_save(self):
         answer = sg.popup_yes_no('Do you want to save this approach?')
@@ -347,33 +364,41 @@ class Environment():
         else:
             csv_filename = 'eval_' + str(repeat_times) + '_resnet_model.csv'
 
-        eval_times = []
+        # eval_times = []
+        run_summaries = []
         for i in range(repeat_times):
             self.spawn_evaluation_obstacle_course()
             self.runtime = 0  # zero the runtime
-            self.evaluate_ai(model)
-            eval_times.append(self.runtime)
+            # time.sleep(10)  # only for showing an img
+            steering_angles, velocities = self.evaluate_ai(model)
+            # eval_times.append(self.runtime)
+            run_summaries.append(dict(runtime=self.runtime, steering_angles=steering_angles, velocities=velocities))
             self.runtime = 0  # zero the runtime
 
-        df = pd.DataFrame(eval_times)
-        df.columns = ['runtime[s]']
+        df = pd.DataFrame(run_summaries)
         df.to_csv(os.path.join('model_training/evaluation', csv_filename))
+        df.to_pickle(os.path.join('model_training/evaluation', csv_filename + '.pkl'))
+
 
 
 def get_random_color():
     """ example [0, 0.3, 1, 1] """
-    colors = [
-              [0.2, 0.1, 0.05, 1],
-              # [0.2, 0.6, 0.05, 1],
-              [0.6, 0.1, 0.3, 1],
-              [0.05, 0.15, 0.5, 1],
-              [0.7, 0.7, 0.7, 1],
-              [0.1, 0.1, 0.15, 1],
-              [0.9, 0.9, 0.9, 1],
-              [0.1, 0.1, 0.6, 1],
-              ]
-    rand_i = np.random.randint(0, len(colors))
-    return colors[rand_i]
+    # colors = [
+    #           [0.2, 0.1, 0.05, 1],
+    #           # [0.2, 0.6, 0.05, 1],
+    #           [0.6, 0.1, 0.3, 1],
+    #           [0.05, 0.15, 0.5, 1],
+    #           [0.7, 0.7, 0.7, 1],
+    #           [0.1, 0.1, 0.15, 1],
+    #           [0.9, 0.9, 0.9, 1],
+    #           [0.1, 0.1, 0.6, 1],
+    #           ]
+    # rand_i = np.random.randint(0, len(colors))
+    # return colors[rand_i]
+
+    # return only white cars
+    return [0.9, 0.9, 0.9, 1]
+
 
 def load_multibody(is_stl, file_path, texture_path, scale, pos, rpy_orient):
     print("(os.getcwd()) =", os.getcwd())

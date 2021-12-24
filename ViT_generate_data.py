@@ -30,7 +30,8 @@ OK - end simulation when collision detected
 
 if __name__ == "__main__":
     # define environment
-    difficulty_distance = 12
+    # difficulty_distance = 12
+    difficulty_distance = 22
     ai_steering = False
 
     environment = Environment(dt=DETLA_T, ai_steering=ai_steering, difficulty_distance=difficulty_distance)

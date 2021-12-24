@@ -37,8 +37,8 @@ if __name__ == "__main__":
     # num_outputs = 2
     num_outputs = 1
     if do_vit:
-        params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3,
-                      dim=64, depth=1, heads=2, mlp_dim=128)
+        # params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)  # original parameters
+
         # config_ViT = dict(model='ViT', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
         # config_ViT = {'batch_size': 10, 'dropout': 0.3, 'early_stopping': False, 'epochs': 200, 'l2_regularization_weight': 0, 'learning_rate': 0.0322595974979814, 'model': 'ViT', 'optimizer': 'sgd'}
         # config_ViT = dict(model='ViT', learning_rate=0.003, epochs=40, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
@@ -57,12 +57,34 @@ if __name__ == "__main__":
 
 
         # verdict - get back to only 1 output so we teach only steering angle
-        config_ViT = dict(model='ViT', learning_rate=0.05881, epochs=1000, batch_size=10, optimizer='adam', early_stopping=False, l2_regularization_weight=0.1)
-        model = ViTRegression(wandb_config=config_ViT, **params)
+        # config_ViT = dict(model='ViT', learning_rate=0.05881, epochs=1000, batch_size=10, optimizer='adam', early_stopping=False, l2_regularization_weight=0.1)
+        # model = ViTRegression(wandb_config=config_ViT, **params)
         # model.load_state_dict(torch.load('model_training/trained_models/model_1000_ViT_from_sweeps_0.pth'))
         # model.load_state_dict(torch.load('model_training/trained_models/model_56_ViT_1000_early_stopping.pth'))
-        model.load_state_dict(torch.load('model_training/trained_models/model_60_ViT.pth'))
+        # model.load_state_dict(torch.load('model_training/trained_models/model_60_ViT.pth'))
 
+        """ try find the model that was working nicely """
+        # params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=128)  # original parameters
+        # config_ViT = dict(model='ViT', learning_rate=0.003, epochs=40, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
+        # model = ViTRegression(wandb_config=config_ViT, **params)
+        # model.load_state_dict(torch.load('model_training/trained_models/multicolor_data/check_theese_models/model_700_ViT_data_24th.pth'))  # dataset 1 !!!!!!!!!!!!!!
+
+        # params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=64)  # new parameters
+        # config_ViT = dict(model='ViT', learning_rate=0.003, epochs=40, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
+        # model = ViTRegression(wandb_config=config_ViT, **params)
+        # model.load_state_dict(torch.load('model_training/trained_models/model_19_ViT_300_early_stopping.pth'))
+
+        params = dict(image_size=256, patch_size=8, num_outputs=num_outputs, channels=3, dim=64, depth=1, heads=2, mlp_dim=64)  # simpler model params
+        config_ViT = dict(model='ViT', learning_rate=0.003, epochs=40, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
+        model = ViTRegression(wandb_config=config_ViT, **params)
+        # model.load_state_dict(torch.load('model_training/trained_models/model_145_ViT_700_early_stopping.pth'))  # white cars training data 3
+        # model.load_state_dict(torch.load('model_training/trained_models/model_84_ViT_700_early_stopping.pth'))  # white cars training data 2
+        # model.load_state_dict(torch.load('model_training/trained_models/model_700_ViT_white_cars_dataset_2.pth'))  # white cars training data 2
+        # model.load_state_dict(torch.load('model_training/trained_models/model_700_ViT_white_cars_dataset_3.pth'))  # white cars training data 3
+        # model.load_state_dict(torch.load('model_training/trained_models/model_27_ViT_700_early_stopping_horiz_flip_dataset_3.pth'))  # white cars training data 3
+        model.load_state_dict(torch.load('model_training/trained_models/model_100_ViT_horiz_flip_dataset_3.pth'))  # white cars training data 3
+        # model.load_state_dict(torch.load('model_training/trained_models/model_292_ViT_300_early_stopping.pth'))
+        # model.load_state_dict(torch.load('model_training/trained_models/model_300_ViT.pth'))
     else:
         # config_resnet = dict(model='resnet', learning_rate=0.003, epochs=20, batch_size=10, optimizer='adam')
         # model = ResnetRegression(wandb_config=config_resnet, num_outputs=num_outputs)
@@ -71,7 +93,11 @@ if __name__ == "__main__":
         config_resnet = {'batch_size': 10, 'dropout': 0.4, 'early_stopping': False, 'epochs': 200, 'l2_regularization_weight': 0.3,
          'learning_rate': 0.07573456017600638, 'model': 'resnet', 'optimizer': 'sgd'}
         model = ResnetRegression(wandb_config=config_resnet, num_outputs=num_outputs)
-        model.load_state_dict(torch.load('model_training/trained_models/model_200_resnet.pth'))
+        # model.load_state_dict(torch.load('model_training/trained_models/model_200_resnet.pth'))
+        model.load_state_dict(torch.load('model_training/trained_models/old_1_dim_regression/model_20_resnet.pth'))
+        # model.load_state_dict(torch.load('model_training/trained_models/old_1_dim_regression/model_200_resnet.pth'))  # ViT
+        # model.load_state_dict(torch.load('model_training/trained_models/check_theese_models/model_200_resnet(1).pth'))  # ViT
+        # model.load_state_dict(torch.load('model_training/trained_models/check_theese_models/model_700.pth'))  # ViT
 
     # define environment
     ai_steering = True
@@ -80,8 +106,8 @@ if __name__ == "__main__":
     # environment = Environment(dt=DETLA_T, ai_steering=ai_steering, difficulty_distance=difficulty_distance, connect_gui=False)
     environment.set_cool_game_vibe_camera_position()
 
-    # environment.run(eval_run=True, keyboard_steering=False, ai_steering=True, **dict(ai_model=model))
+    environment.run(eval_run=True, keyboard_steering=False, ai_steering=True, **dict(ai_model=model))
     # environment.run(eval_run=False, keyboard_steering=False, ai_steering=True, **dict(ai_model=model))
-    environment.evaluate_many_tries(repeat_times=50, model=model)
+    environment.evaluate_many_tries(repeat_times=10, model=model)
 
     # test_show_obstacles()

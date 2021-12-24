@@ -206,6 +206,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/model_training/data/whole_24-11_day_training_data.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/model_training/evaluation/eval_2_vit_model.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/model_training/evaluation/eval_3_vit_model.csv">
           <value>
             <Attribute>
@@ -221,6 +235,13 @@
           </value>
         </entry>
         <entry key="/model_training/evaluation/eval_vit_model.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/model_training/evaluation/get_info_eval_data.py">
           <value>
             <Attribute>
               <option name="separator" value="," />

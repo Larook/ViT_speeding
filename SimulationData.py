@@ -23,8 +23,10 @@ class SimulationData():
         # create a csv with the month_day_h_m
         if create:
             now = datetime.now()
+            # dt_string = now.strftime("%d-%m_%H:%M")
             dt_string = now.strftime("%d-%m_%H:%M")
-            self.dir_path = 'model_training/data/' + dt_string + '_training_data'
+            # self.dir_path = 'model_training/data/' + dt_string + '_training_data'
+            self.dir_path = 'model_training/data/SmallWhite_' + dt_string + '_training_data'
             # print("os.path.exists(self.dir_path)", os.path.exists(self.dir_path))
             if 'tests' not in os.getcwd():
                 if not os.path.exists(self.dir_path):

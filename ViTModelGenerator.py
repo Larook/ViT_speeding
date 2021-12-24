@@ -85,7 +85,7 @@ class ViTRegression(nn.Module):
                                                # transforms.Grayscale(num_output_channels=1),
                                                transforms.ColorJitter(brightness=.5, hue=.3),
                                                transforms.RandomEqualize(),
-                                               # transforms.RandomVerticalFlip(),
+                                               transforms.RandomHorizontalFlip(),
                                                transforms.ToTensor()
                                                ])
 
@@ -131,10 +131,13 @@ class ViTRegression(nn.Module):
             # pprint(config)
             wandb.watch(self, self.criterion, log="all", log_freq=1000)
 
-            test_epoch_avg_loss_prev = 0
+            self.max_epochs = config['epochs']
+            self.loss_train_history = []
+            self.loss_test_history = []
 
+            test_epoch_avg_loss_prev = 0
             # Loop over epochs
-            for epoch in tqdm(range(config['epochs'])):
+            for epoch in tqdm(range(self.max_epochs)):
                 train_epoch_avg_loss_now = self.train_epoch_return_avg_loss()
                 test_epoch_avg_loss_now = self.test_epoch_return_avg_loss()
 
@@ -155,8 +158,7 @@ class ViTRegression(nn.Module):
                 test_epoch_avg_loss_prev = train_epoch_avg_loss_now
 
             """ model training statistics """
-            self.save_training_model_statistics()
-
+            # self.save_training_model_statistics()
             model_save_path = 'model_training/trained_models/model_' + str(self.max_epochs) + '_' + str(
                 self.wandb_config['model']) + '.pth'
             torch.save(self.state_dict(), model_save_path)

@@ -26,6 +26,7 @@ from model_training import vit_pytorch
 class ResnetRegression(nn.Module):
     def __init__(self, wandb_config, num_outputs):
         self.num_outputs = num_outputs
+        self.no_outputs = num_outputs
         torch.manual_seed(42)
         super().__init__()
         self.wandb_config = wandb_config
