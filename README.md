@@ -8,9 +8,9 @@ The idea behind this project is to develop and compare the driving capabilities 
 Model was trained and evaluated on a data collected from a built simulated enviroment.
 
 
-<img src="https://github.com/Larook/ViT_speeding/blob/master/figures/vit_architecture.png">
-
 <img src="https://github.com/Larook/ViT_speeding/blob/master/figures/simple_idea.png">
+
+<img src="https://github.com/Larook/ViT_speeding/blob/master/figures/overleaf/example_input_camera.png">
 
 
 - Simulation engine
@@ -24,6 +24,10 @@ For the simulation environment python based api to Bullet physics engine was use
 
 Training of the vision model was made on the google cloud on the Google collab.
 The network models were written in python using pytorch library.
+
+
+<img src="https://github.com/Larook/ViT_speeding/blob/master/figures/vit_architecture.png">
+
 
 - WandB
 
