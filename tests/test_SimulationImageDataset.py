@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
 
-from SimulationData import SimulationData
+from SimulationData import SimulationDataLoader
 from SimulationImageDataset import SimulationImageDataset
 
 
@@ -13,8 +13,8 @@ class TestSimulationImageDataset(TestCase):
 
     def startUp(self):
         self.dir_path = '../model_training/data/30-09_18:06_training_data/'
-        data = SimulationData(create=False)
-        main_df = data.get_load_pickles_to_df(create=False, dir_path=self.dir_path)
+        data = SimulationDataLoader(create=False)
+        main_df = data.get_loaded_pickles(create=False, dir_path=self.dir_path)
         print("main_df", main_df)
         pass
 
@@ -24,8 +24,8 @@ class TestSimulationImageDataset(TestCase):
 
     def test_show_images_from_df(self):
         dir_path = '../model_training/data/30-09_18:06_training_data/'
-        data = SimulationData(create=False)
-        main_df = data.get_load_pickles_to_df(create=False, dir_path=dir_path)
+        data = SimulationDataLoader(create=False)
+        main_df = data.get_loaded_pickles(create=False, dir_path=dir_path)
         dataset = SimulationImageDataset(main_df)
         img, angle, vel = dataset[0]
 
@@ -36,8 +36,8 @@ class TestSimulationImageDataset(TestCase):
 
     def test_get_training_test_split(self):
         dir_path = '../model_training/data/30-09_18:06_training_data/'
-        data = SimulationData(create=False)
-        main_df = data.get_load_pickles_to_df(create=False, dir_path=dir_path)
+        data = SimulationDataLoader(create=False)
+        main_df = data.get_loaded_pickles(create=False, dir_path=dir_path)
         dataset = SimulationImageDataset(main_df)
 
         imgs_training, angles_training, vels_training, imgs_test, angles_test, vels_test = dataset.get_training_test_split(0.8)
@@ -48,7 +48,7 @@ class TestSimulationImageDataset(TestCase):
         from torch.utils.data import DataLoader
 
         dir_path = '../model_training/data/30-09_18:06_training_data/'
-        data = SimulationData(create=False)
+        data = SimulationDataLoader(create=False)
 
         # splits main_df to TRAIN and TEST, because we need separate trainloaders
         train_df, test_df = data.load_dfs_from_pickles(create=False, training_percentage=0.8, dir_path=dir_path, shuffle=True)

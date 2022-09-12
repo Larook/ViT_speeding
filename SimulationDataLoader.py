@@ -48,7 +48,7 @@ class SimulationData():
 
         pass
 
-    def get_load_pickles_of_one_day_to_df(self, dir_name_begin, create=True, **kwargs):
+    def get_loaded_pickles_one_day(self, dir_name_begin, create=True, **kwargs):
         # go through the directory with pickles as parts and concat the dfs to get the full df
         print("dir_name_begin", dir_name_begin)
 
@@ -75,8 +75,7 @@ class SimulationData():
         # return None
         return main_df
 
-
-    def get_load_pickles_to_df(self, create=True, **kwargs):
+    def get_loaded_pickles(self, create=True, **kwargs):
         # go through the directory with pickles as parts and concat the dfs to get the full df
         # print("\n\nself.dir_path", self.dir_path)
 

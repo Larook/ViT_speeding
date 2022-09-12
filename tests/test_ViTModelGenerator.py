@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 from torch.utils.data import DataLoader
 
-from SimulationData import SimulationData
+from SimulationData import SimulationDataLoader
 from SimulationImageDataset import SimulationImageDataset
 from ViTModelGenerator import ViTRegression
 

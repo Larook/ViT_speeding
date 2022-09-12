@@ -4,13 +4,13 @@ from unittest import TestCase
 
 import pandas as pd
 
-from SimulationData import SimulationData
+from SimulationData import SimulationDataLoader
 
 
 class TestTrainingData(unittest.TestCase):
     def setUp(self):
         print("hello from test")
-        self.data = SimulationData()
+        self.data = SimulationDataLoader()
 
 
     def tearDown(self):
@@ -21,7 +21,7 @@ class TestTrainingData(unittest.TestCase):
         print("os.getcwd()", os.getcwd())
 
         self.data.dir_path = '../model_training/data/30-09_18:06_training_data/'
-        main_df = self.data.get_load_pickles_to_df()
+        main_df = self.data.get_loaded_pickles()
         self.assertEqual(type(main_df), pd.DataFrame)
         print("managed to load big df")
 
