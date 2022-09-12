@@ -18,7 +18,7 @@ from torch import nn, optim
 import einops
 from tqdm import tqdm
 
-from SimulationData import SimulationData
+from SimulationDataLoader import SimulationDataLoader
 from SimulationImageDataset import SimulationImageDataset
 from model_training import vit_pytorch
 
@@ -57,7 +57,7 @@ class ResnetRegression(nn.Module):
     def load_dataloaders(self, pickle_df_path):
         """ reads the pickles from the directory and updates dfs, SimulationData and dataloaders """
         # load training data
-        self.data = SimulationData(create=False)
+        self.data = SimulationDataLoader(create=False)
         self.train_df, self.test_df = self.data.load_dfs_from_pickles(create=False, training_percentage=0.8,
                                                                       pickle_df_path=pickle_df_path, shuffle=True)
 

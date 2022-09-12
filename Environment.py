@@ -16,7 +16,7 @@ import numpy as np
 import pybullet as pb
 import pybullet_data
 
-from SimulationData import SimulationData
+from SimulationData import SimulationDataLoader
 
 
 
@@ -72,7 +72,7 @@ class Environment():
         # zin = pb.addUserDebugParameter("z", 0, 1., 0.5)
 
         if not ai_steering:
-            self.training_data = SimulationData()
+            self.training_data = SimulationDataLoader()
         self.spawn_agent()
 
     def spawn_random_obstacles_cars(self):

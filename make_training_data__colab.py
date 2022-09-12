@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os.path
-from SimulationData import SimulationData
+from SimulationDataLoader import SimulationDataLoader
 
 def make_training_dataset():
     """ for running in the colab """
@@ -9,12 +9,12 @@ def make_training_dataset():
     # dir_name_begin_day = '24-11_'
     dir_name_begin_day = '25-11_'
 
-    data = SimulationData(create=False)
+    data = SimulationDataLoader(create=False)
 
     # !pip3 install pickle5
     # import pickle5 as pickle
 
-    main_df = data.get_load_pickles_of_one_day_to_df(create=False, dir_path=dir_path, dir_name_begin=dir_name_begin_day)
+    main_df = data.get_loaded_pickles_one_day(create=False, dir_path=dir_path, dir_name_begin=dir_name_begin_day)
     print("main_df", main_df)
     file_name = "whole_" + dir_name_begin_day + "day_training_data.pkl"
     file_path = os.path.join(os.getcwd(), 'model_training/data', file_name)

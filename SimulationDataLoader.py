@@ -7,7 +7,7 @@ import pickle
 import pandas as pd
 
 
-class SimulationData():
+class SimulationDataLoader():
     """ save everything to pandas df to easily save to csv
         make sure that not everything is saved in RAM
         if collision detected discard last X seconds of data to save """

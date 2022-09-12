@@ -13,7 +13,7 @@ import time
 # from matplotlib import pyplot as plt
 #
 # from Environment import Environment
-from SimulationData import SimulationData
+from SimulationDataLoader import SimulationDataLoader
 from ViTModelGenerator import ViTRegression
 from ResnetModelGenerator import ResnetRegression
 
