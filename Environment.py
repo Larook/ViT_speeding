@@ -16,8 +16,7 @@ import numpy as np
 import pybullet as pb
 import pybullet_data
 
-from SimulationData import SimulationDataLoader
-
+from SimulationDataLoader import SimulationDataLoader
 
 
 class Environment():
@@ -183,7 +182,6 @@ class Environment():
         # self.agent = Agent(urdf_path="urdfs/real_cars/mercedes_slk.urdf")
         # self.agent = Agent(urdf_path="urdfs/real_cars/van_car.urdf")
         # self.agent = Agent(urdf_path="urdfs/real_cars/volga.urdf")
-
         self.agent_id = self.agent.id
 
     def run(self, keyboard_steering, ai_steering, eval_run=False, **kwargs):
@@ -210,7 +208,7 @@ class Environment():
 
     def move_and_get_obstacle_idx_to_reset(self, v_y: float) -> list:
         idx_to_remove = []
-        # Todo: change from velocities to update the pose so the object dont fly
+        # change from velocities to update the pose so the object dont fly
         for i in self.env_pb_obstacle_ids:
             # pb.resetBaseVelocity(i, linearVelocity=[0, -v_y, 0], angularVelocity=[0, 0, 0])
             pos, rot = pb.getBasePositionAndOrientation(i)
@@ -239,7 +237,6 @@ class Environment():
         for joint in range(10):
             # pb.changeVisualShape(obs_id, joint, rgbaColor=get_random_color(), physicsClientId=0)
             pb.changeVisualShape(obs_id, linkIndex=-1, rgbaColor=get_random_color(), specularColor=[250, 250, 250])
-
         return None
 
     def gather_data(self):
@@ -249,14 +246,13 @@ class Environment():
         can_proceed = True
         while can_proceed:  # not enough_data_created:
             # if agent in collision then stop the game
-            can_proceed = not self.agent.collision_detected() and self.agent.is_on_the_lane()
+            can_proceed = not self.agent.is_collision_detected() and self.agent.is_on_the_lane()
 
             # update camera pose
             self.set_cool_game_vibe_camera_position()
 
             # take and save the image
-            # img = self.agent.take_image(display=False)
-            img = self.agent.take_image(display=False)
+            img = self.agent.get_image_from_camera(display=False)
 
             # save the action to take for current img
             v_y = self.agent.get_new_v(self.sim_dt, keyboard=True)
@@ -280,9 +276,11 @@ class Environment():
             print("self.dir_path", self.training_data.dir_path)
             files_in_dir = os.listdir(self.training_data.dir_path)
             print("files_in_dir", files_in_dir)
-            os.rmdir(self.training_data.dir_path)
-            print("REMOVED ALL FILES FROM THIS ATTEMPT")
-
+            if len(self.training_data.dir_path) > 0:
+                os.rmdir(self.training_data.dir_path)
+                print("REMOVED ALL FILES FROM THIS ATTEMPT")
+            else:
+                print("Current set directory to data was empty -- cannot delete!")
 
     def evaluate_ai(self, ai_model):
         print("*********************** evaluate_ai ***********************")
@@ -295,10 +293,10 @@ class Environment():
         can_proceed = True
         # print("self.agent.is_on_the_lane()", self.agent.is_on_the_lane())
         while can_proceed:
-            can_proceed = not self.agent.collision_detected() and self.agent.is_on_the_lane()
+            can_proceed = not self.agent.is_collision_detected() and self.agent.is_on_the_lane()
 
             # if agent in collision then stop the game
-            img = self.agent.take_image(display=False)
+            img = self.agent.get_image_from_camera(display=False)
 
             # need to change dimensions of img (assume batch = 1)
             input_tensor = preprocess(Image.fromarray(img))
@@ -342,12 +340,12 @@ class Environment():
     def set_cool_game_vibe_camera_position(self):
         default_camera_view = pb.getDebugVisualizerCamera()
         cam_dist = default_camera_view[10]
+        """
         cam_target = default_camera_view[11]
         cam_yaw = default_camera_view[8]
         cam_pitch = default_camera_view[9]
-
-        # pb.resetDebugVisualizerCamera(cam_dist, 0, cam_pitch-10, np.add(cam_target, [0, 1.8, -0.4]))
-
+        pb.resetDebugVisualizerCamera(cam_dist, 0, cam_pitch-10, np.add(cam_target, [0, 1.8, -0.4]))
+        """
         agent_pose, _ = pb.getBasePositionAndOrientation(self.agent_id)
         pb.resetDebugVisualizerCamera(cam_dist, 0, -20, np.add(agent_pose, [0, 2.8, -0.4]))
 
@@ -380,25 +378,23 @@ class Environment():
         df.to_pickle(os.path.join('model_training/evaluation', csv_filename + '.pkl'))
 
 
-
-def get_random_color():
+def get_random_color(only_white=True):
     """ example [0, 0.3, 1, 1] """
-    # colors = [
-    #           [0.2, 0.1, 0.05, 1],
-    #           # [0.2, 0.6, 0.05, 1],
-    #           [0.6, 0.1, 0.3, 1],
-    #           [0.05, 0.15, 0.5, 1],
-    #           [0.7, 0.7, 0.7, 1],
-    #           [0.1, 0.1, 0.15, 1],
-    #           [0.9, 0.9, 0.9, 1],
-    #           [0.1, 0.1, 0.6, 1],
-    #           ]
-    # rand_i = np.random.randint(0, len(colors))
-    # return colors[rand_i]
-
-    # return only white cars
-    return [0.9, 0.9, 0.9, 1]
-
+    if only_white:
+        return [0.9, 0.9, 0.9, 1]
+    else:
+        colors = [
+                  [0.2, 0.1, 0.05, 1],
+                  # [0.2, 0.6, 0.05, 1],
+                  [0.6, 0.1, 0.3, 1],
+                  [0.05, 0.15, 0.5, 1],
+                  [0.7, 0.7, 0.7, 1],
+                  [0.1, 0.1, 0.15, 1],
+                  [0.9, 0.9, 0.9, 1],
+                  [0.1, 0.1, 0.6, 1],
+                  ]
+        rand_i = np.random.randint(0, len(colors))
+        return colors[rand_i]
 
 def load_multibody(is_stl, file_path, texture_path, scale, pos, rpy_orient):
     print("(os.getcwd()) =", os.getcwd())

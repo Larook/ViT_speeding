@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 from torch.utils.data import DataLoader
 
-from SimulationData import SimulationDataLoader
+from SimulationDataLoader import SimulationDataLoader
 from SimulationImageDataset import SimulationImageDataset
 from ViTModelGenerator import ViTRegression
 
@@ -63,7 +63,8 @@ class TestViTRegression(TestCase):
     def test_train_epoch(self):
         model = ViTRegression(**self.params)
         model.load_dataloaders(dir_path=self.dir_path)
-        model.training_pipeline(max_epochs=50, save_path='test_model.pth')
+        # model.training_pipeline(max_epochs=50, save_path='test_model.pth')
+        model.training_pipeline()
         model.plot_training_history()
         pass
 

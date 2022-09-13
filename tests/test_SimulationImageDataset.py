@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
 
-from SimulationData import SimulationDataLoader
+from SimulationDataLoader import SimulationDataLoader
 from SimulationImageDataset import SimulationImageDataset
 
 
@@ -47,12 +47,12 @@ class TestSimulationImageDataset(TestCase):
     def test_dataloaders(self):
         from torch.utils.data import DataLoader
 
-        dir_path = '../model_training/data/30-09_18:06_training_data/'
+        # dir_path = '../model_training/data/30-09_18:06_training_data/'
+        pickle_df_path = '../model_training/data/whole_SmallWhite_22-12day_training_data_dataset_2.pkl'  # white cars 67 imgs
         data = SimulationDataLoader(create=False)
 
         # splits main_df to TRAIN and TEST, because we need separate trainloaders
-        train_df, test_df = data.load_dfs_from_pickles(create=False, training_percentage=0.8, dir_path=dir_path, shuffle=True)
-
+        train_df, test_df = data.get_train_test_df_from_pickles(create=False, training_percentage=0.8, pickle_df_path=pickle_df_path, shuffle=True)
         # split the df into training and testing
         for df in [train_df, test_df]:
             dataset_train = SimulationImageDataset(main_df=df)

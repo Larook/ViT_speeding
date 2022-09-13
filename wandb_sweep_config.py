@@ -47,3 +47,17 @@ sweep_config = {
                           }
                     }
     }
+def get_example_set_hyperparams(wand_sweep_config):
+    example_hyperparams = {}
+    wand_hyperparameters = wand_sweep_config['parameters']
+    for k in wand_hyperparameters:
+        if 'value' in wand_hyperparameters[k]:
+            example_hyperparams[k] = wand_hyperparameters[k]['value']
+        elif 'values' in wand_hyperparameters[k]:
+            example_hyperparams[k] = wand_hyperparameters[k]['values'][0]
+    return example_hyperparams
+
+
+if __name__ == "__main__":
+    hyperparams = get_example_set_hyperparams()
+    print('hyperparams', hyperparams)

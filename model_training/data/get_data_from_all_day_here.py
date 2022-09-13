@@ -1,4 +1,4 @@
-from SimulationData import SimulationDataLoader
+from SimulationDataLoader import SimulationDataLoader
 
 
 if __name__ == "__main__":

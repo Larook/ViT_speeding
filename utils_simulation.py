@@ -61,6 +61,6 @@ def test_show_obstacles():
     for i in range(10000):
         pos, rot = pb.getBasePositionAndOrientation(agent.id)
         pb.resetBasePositionAndOrientation(agent.id, posObj=np.add(pos, [0.2 * math.cos(i/10), 0 , 0]), ornObj=rot)
-        agent.take_image()
+        agent.get_image_from_camera()
         pb.stepSimulation()
         time.sleep(0.005)

@@ -4,7 +4,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from SimulationData import SimulationDataLoader
+from SimulationDataLoader import SimulationDataLoader
 
 
 class TestTrainingData(unittest.TestCase):

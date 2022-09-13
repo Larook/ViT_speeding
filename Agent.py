@@ -49,7 +49,7 @@ class Agent:
         # calculates the velocity of obstacles based on own velocity and the steering angle
         return math.cos(math.radians(self.steering_angle)) * self.velocity
 
-    def take_image(self, display=False):
+    def get_image_from_camera(self, display=False):
         res = 400
 
         eye, orient = pb.getBasePositionAndOrientation(self.id)
@@ -91,8 +91,7 @@ class Agent:
         v_y = self.angle_to_vy()
         return v_y
 
-
-    def collision_detected(self):
+    def is_collision_detected(self):
         """ returns True when agent is in collision """
         contact_points = pb.getContactPoints(bodyA=self.id)  # , physicsClientId=1)
         print("contact_points", contact_points)

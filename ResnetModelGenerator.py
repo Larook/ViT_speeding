@@ -58,8 +58,8 @@ class ResnetRegression(nn.Module):
         """ reads the pickles from the directory and updates dfs, SimulationData and dataloaders """
         # load training data
         self.data = SimulationDataLoader(create=False)
-        self.train_df, self.test_df = self.data.load_dfs_from_pickles(create=False, training_percentage=0.8,
-                                                                      pickle_df_path=pickle_df_path, shuffle=True)
+        self.train_df, self.test_df = self.data.get_train_test_df_from_pickles(create=False, training_percentage=0.8,
+                                                                               pickle_df_path=pickle_df_path, shuffle=True)
 
         train_transforms = transforms.Compose([transforms.Resize((256, 256)),
                                                # transforms.Grayscale(num_output_channels=1),
@@ -80,7 +80,7 @@ class ResnetRegression(nn.Module):
     def forward(self, img, mask=None):
         return self.model(img.to(self.device))
 
-    def train_epochs(self):
+    def training_pipeline(self):
         with wandb.init(config=self.wandb_config):
             config = wandb.config
             print("train_epochs, config", config)

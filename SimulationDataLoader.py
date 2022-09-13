@@ -96,7 +96,7 @@ class SimulationDataLoader():
 
         return main_df
 
-    def load_dfs_from_pickles(self, create, training_percentage, pickle_df_path, shuffle):
+    def get_train_test_df_from_pickles(self, create, training_percentage, pickle_df_path, shuffle):
         # load the pickles to df
         # df = self.get_load_pickles_to_df(create, dir_path=dir_path)
         df = pd.read_pickle(pickle_df_path)

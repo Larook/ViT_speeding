@@ -35,9 +35,8 @@ if __name__ == "__main__":
     ai_steering = False
 
     environment = Environment(dt=DETLA_T, ai_steering=ai_steering, difficulty_distance=difficulty_distance)
-    # img = environment.agent.take_image(display=True)
-    # time.sleep(10)
+    # img = environment.agent.get_image_from_camera(display=True)
+    # time.sleep(1)
     environment.set_cool_game_vibe_camera_position()
 
     environment.run(keyboard_steering=True, ai_steering=ai_steering)
-    # test_show_obstacles()

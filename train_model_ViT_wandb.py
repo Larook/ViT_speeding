@@ -21,7 +21,7 @@ from ResnetModelGenerator import ResnetRegression
 
 import wandb
 import pprint
-from sweep_config import sweep_config
+from wandb_sweep_config import sweep_config
 
 DETLA_T = 0.1
 
@@ -76,7 +76,7 @@ def model_pipeline(hyperparameters):
         model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
         # model.training_pipeline()
-        model.better_training_pipeline()
+        model.training_pipeline()
         # model.plot_training_history()
     # model.to_onnx()
     # wandb.save("model.onnx")
@@ -88,10 +88,7 @@ def run_regular_wandb_training(model):
     wandb.init(project="my-test-project", entity="larook")
     # wandb.init(mode="disabled")
 
-
     time_start = time.time()
-    configs = []
-
     # config = dict(model=model, learning_rate=0.05881, epochs=1000, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
     # config = dict(model=model, learning_rate=0.05881, epochs=1000, batch_size=10, optimizer='adam', early_stopping=False, l2_regularization_weight=0.1)
     # config = dict(model=model, learning_rate=0.07, epochs=300, batch_size=10, optimizer='adam', early_stopping=True, l2_regularization_weight=0.1)
@@ -130,9 +127,8 @@ def run_sweeps_wandb_training():
             training_pickle_df_path = 'model_training/data/whole_22-12day_training_data.pkl'
             model.load_dataloaders(pickle_df_path=training_pickle_df_path)
 
-            model.better_training_pipeline()
+            model.training_pipeline()
             # model.training_pipeline()
-
 
     # check if sweep config is correctly loaded
     pprint.pprint(sweep_config)
@@ -149,7 +145,7 @@ if __name__ == "__main__":
     # https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb#scrollTo=r4VjKui20N3j
 
     run_regular_wandb_training(model='ViT')
-    # run_regular_wandb_training(model='resnet')
+    # run_regular_wandb_training(model='resnet')  # todo: Finish compatibility with Resnet!
     # run_sweeps_wandb_training()
 
 
